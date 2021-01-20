@@ -4,8 +4,8 @@
   "description": "A application to track specific stats based on a given sport and report a outline for fantasy owners.",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "nodemon server/index.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
