@@ -28,7 +28,22 @@ router.get('/', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
+
     res.render('nba.ejs', {games: gamesData});
+});
+
+router.get('/', async (req, res, next) => {
+    teamsURL = API_URL + 'teams'; 
+    let teamsData;
+
+    try{
+        const {data } = await axios.get(teamsURL);
+        teamsData = data.data;
+    }catch (err) {
+        next(err);
+    }
+    
+    res.render('nba.ejs', {teams: teamsData});
 });
 
 module.exports = router;
