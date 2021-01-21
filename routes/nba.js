@@ -19,6 +19,10 @@ function getDate() {
 }
 
 router.get('/', async (req, res, next) => {
+    res.render('nba.ejs');
+});
+
+router.get('/schedule', async (req, res, next) => {
     var date = getDate();
     gamesURL = API_URL + `games?dates[]=${date}`;
     let gamesData;
@@ -29,10 +33,10 @@ router.get('/', async (req, res, next) => {
         next(err);
     }
 
-    res.render('nba.ejs', {games: gamesData});
+    res.render('schedule.ejs', {games: gamesData});
 });
 
-router.get('/', async (req, res, next) => {
+router.get('/teams', async (req, res, next) => {
     teamsURL = API_URL + 'teams'; 
     let teamsData;
 

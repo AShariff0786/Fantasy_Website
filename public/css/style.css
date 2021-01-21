@@ -15,8 +15,39 @@ body {
     background-color: #131313;
 }
 
+.navbar-brand {
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+#navbarSupportedContent > ul > li:nth-child(n) > a {
+    font-size: 1.1rem;
+    color: #ffffff;
+    margin-top: 2px;
+}
+
 #navbarSupportedContent > ul > li:nth-child(n) > a:hover {
     color:#0071BC;
+}
+
+.btn-group-wrap {
+    text-align: center;
+}
+
+div.btn-group {
+    margin: 0 auto; 
+    text-align: center;
+    width: inherit;
+    display: inline-block;
+}
+
+div.btn-group button {
+    background-color: #131313;
+}
+
+div.btn-group button:hover {
+    background-color: #0071BC;
 }
 
 .card-img-top {
