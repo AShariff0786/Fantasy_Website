@@ -18,8 +18,40 @@ function getDate() {
     return [year, month, day].join('-');
 }
 
-router.get('/', async (req, res, next) => {
-    res.render('nba.ejs');
+router.get('/season_averages', async (req, res, next) => {
+    seasonAvgURL = API_URL + 'season_averages';
+    let seasonAvgData;
+    try {
+        const { data } = await axios.get(seasonAvgURL);
+        seasonAvgData = data.data;
+    } catch (err) {
+        next(err);
+    }
+    res.render('season_averages.ejs', {seasonAvgs: seasonAvgData});
+});
+
+router.get('/players', async (req, res, next) => {
+    playersURL = API_URL + 'players';
+    let playersData;
+    try {
+        const { data } = await axios.get(playersURL);
+        playersData = data.data;
+    } catch (err) {
+        next(err);
+    }
+    res.render('players.ejs', {players: playersData});
+});
+
+router.get('/stats', async (req, res, next) => {
+    statsURL = API_URL + 'stats';
+    let statsData;
+    try {
+        const { data } = await axios.get(statsURL);
+        statsData = data.data;
+    } catch (err) {
+        next(err);
+    }
+    res.render('stats.ejs', {stats: statsData});
 });
 
 router.get('/schedule', async (req, res, next) => {
