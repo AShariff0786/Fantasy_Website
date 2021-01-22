@@ -16,18 +16,19 @@
             </div>
         </div>
         <h1 class="text-center">
-            Teams: 
+            Player Stats: 
         </h1>
         <div class="row">
-         <% teams.forEach(teams => { %>
+         <% stats.forEach(stats => { %>
                 <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                     <div class="card mt-3">
                       <div class="card-body">
-                        <h5 class="card-title text-center"><%= teams.full_name %></h5>
-                        <h6 class="card-title text-center"><%= teams.abbreviation %></h6>
-                        <div class="row justify-content-between">
-                            <div class="col-12">
-                                <img id="team-logos-svg" src=<%= "/images/logos/" + teams.name + ".svg" %>>
+                        <h5 class="card-title text-center"><%= stats.player.first_name + " " + stats.player.last_name%></h5>
+                        <h6 class = "card-title text-center"><%= "Position: " + stats.player.position %></h6>
+                        <h6 class = "card-title text-center"><%= stats.team.abbreviation %></h6>
+                        <div class = "row">
+                            <div class ="card-body">
+                                
                             </div>
                         </div>
                       </div>
