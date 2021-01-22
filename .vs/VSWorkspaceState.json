@@ -1,10 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\routes",
-    "\\views",
-    "\\views\\templates"
+    "\\public",
+    "\\public\\css",
+    "\\views"
   ],
-  "SelectedNode": "\\server.js",
+  "SelectedNode": "\\views\\players.ejs",
   "PreviewInSolutionExplorer": false
 }
