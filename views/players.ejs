@@ -15,26 +15,33 @@
                 <%- include('./templates/_nbaRouteButtons.ejs') %>
             </div>
         </div>
-        <h1 class="text-center">
-            Player Stats: 
-        </h1>
-        <div class="row">
-         <% players.forEach(players => { %>
-                <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
-                    <div class="card mt-3">
-                      <div class="card-body">
-                        <h5 class="card-title text-center"><%= players.first_name + " " + players.last_name%></h5>
-                        <h6 class = "card-title text-center"><%= "Position: " + players.position %></h6>
-                        <h6 class = "card-title text-center"><%= players.team.abbreviation %></h6>
-                        <div class = "row">
-                            <div class ="card-body">
-                                
-                            </div>
-                        </div>
-                      </div>
-                    </div>
-                </div>
-            <% }) %>
+        <div class="container-fluid p-5">
+            <h1 class="text-center">
+                Player Stats: 
+            </h1>
+            <div class="playerTable">
+                <table id="nbaPlayers" class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th scope="col">Player</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">Position</th>
+                        <th scope="col">Height</th>
+                        <th scope="col">Weight</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <% players.forEach(player => { %>
+                            <tr>
+                                <th scope="row"><%= player.first_name %> <%= player.last_name %></th>
+                                <td><%= player.team.abbreviation %></td>
+                                <td><%= player.position %></td>
+                                <td><%= player.height_feet %>-<%= player.height_inches %></td>
+                                <td><%= player.weight_pounds %></td>
+                              </tr>
+                        <% }) %>
+                    </tbody>
+                  </table>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>

@@ -18,6 +18,10 @@ function getDate() {
     return [year, month, day].join('-');
 }
 
+router.get('/', async(req, res) => {
+    res.render('nba.ejs');
+});
+
 router.get('/stats', async (req, res, next) => {
     seasonAvgURL = API_URL + 'season_averages';
     playersURL = API_URL + 'players';
@@ -39,11 +43,13 @@ router.get('/stats', async (req, res, next) => {
 });
 
 router.get('/players', async (req, res, next) => {
-    playersURL = API_URL + 'players';
+    playersURL = API_URL + 'players?per_page=100';
+    let totalPages;
     let playersData;
     try {
         const { data } = await axios.get(playersURL);
         playersData = data.data;
+        totalPages = data.meta.total_pages;
     } catch (err) {
         next(err);
     }
@@ -72,7 +78,14 @@ router.get('/schedule', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-
+    gamesData.forEach(element => {
+        if (/\s/.test(element.visitor_team.name)) {
+            element.visitor_team.name = element.visitor_team.name.split(" ").join("_");
+        }
+        if (/\s/.test(element.home_team.name)) {
+            element.home_team.name = element.home_team.name.split(" ").join("_");
+        }
+    });
     res.render('schedule.ejs', {games: gamesData});
 });
 
@@ -86,8 +99,12 @@ router.get('/teams', async (req, res, next) => {
     }catch (err) {
         next(err);
     }
-    
-    res.render('nba.ejs', {teams: teamsData});
+    teamsData.forEach(element => {
+        if (/\s/.test(element.name)) {
+            element.name = element.name.split(" ").join("_");
+        }
+    });
+    res.render('teams.ejs', {teams: teamsData});
 });
 
 module.exports = router;

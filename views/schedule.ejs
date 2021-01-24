@@ -18,20 +18,20 @@
                 Scheduled Games: 
                 <%= new Date().toLocaleDateString();%>
             </h1>
-            <div class="row">
-            <% games.forEach(games => { %>
+            <div class="row p-5">
+            <% games.forEach(game => { %>
                 <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                     <div class="card mt-3">
                       <div class="card-body">
-                        <h5 class="card-title text-center"><%= games.status %></h5>
+                        <h5 class="card-title text-center"><%= game.status %></h5>
                         <div class="row justify-content-between">
                             <div class="col-4">
-                                <img id="team-logos-svg" src=<%= "/images/logos/" + games.visitor_team.name + ".svg" %>>
-                                <p class="card-text"><%= games.visitor_team.full_name %></p>
+                                <img id="team-logos-svg" src=<%= "/images/logos/" + game.visitor_team.name + ".svg" %>>
+                                <p class="card-text"><%= game.visitor_team.full_name %></p>
                             </div>
                             <div class="col-4">
-                                <img id="team-logos-svg" src=<%= "/images/logos/" + games.home_team.name + ".svg" %>>
-                                <p class="card-text"><%= games.home_team.full_name %></p>
+                                <img id="team-logos-svg" src=<%= "/images/logos/" + game.home_team.name + ".svg" %>>
+                                <p class="card-text"><%= game.home_team.full_name %></p>
                             </div>
                         </div>
                       </div>
