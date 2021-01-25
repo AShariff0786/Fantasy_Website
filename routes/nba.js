@@ -1,8 +1,18 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const Team = require('../models/teams');
+const Player = require('../models/players');
 const axios = require('axios');
 const router = express.Router();
 
 const API_URL = 'https://www.balldontlie.io/api/v1/';
+
+mongoose.connect('mongodb+srv://trasik:rhino1234@cluster0.vmwam.mongodb.net/FantasyApp?retryWrites=true&w=majority', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}, () => {
+   console.log("Connected to database.");
+});
 
 function getDate() {
     var d = new Date(),
@@ -43,13 +53,9 @@ router.get('/stats', async (req, res, next) => {
 });
 
 router.get('/players', async (req, res, next) => {
-    playersURL = API_URL + 'players?per_page=100';
-    let totalPages;
     let playersData;
     try {
-        const { data } = await axios.get(playersURL);
-        playersData = data.data;
-        totalPages = data.meta.total_pages;
+        playersData = await Player.find();
     } catch (err) {
         next(err);
     }
@@ -90,20 +96,7 @@ router.get('/schedule', async (req, res, next) => {
 });
 
 router.get('/teams', async (req, res, next) => {
-    teamsURL = API_URL + 'teams'; 
-    let teamsData;
-
-    try{
-        const {data } = await axios.get(teamsURL);
-        teamsData = data.data;
-    }catch (err) {
-        next(err);
-    }
-    teamsData.forEach(element => {
-        if (/\s/.test(element.name)) {
-            element.name = element.name.split(" ").join("_");
-        }
-    });
+    const teamsData = await Team.find();
     res.render('teams.ejs', {teams: teamsData});
 });
 

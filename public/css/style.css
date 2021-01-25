@@ -61,11 +61,20 @@ div.btn-group button:hover {
     height: 64px;
 }
 
-.playerTable > table {
+#nbaPlayers,
+#nbaPlayers_length > label > select,
+#nbaPlayers_filter > label > input,
+#nbaPlayers_paginate > ul > li:nth-child(n) > a {
     background-color: #131313;
     color: #ffffff;
+    margin-top: 10px;
+}
+
+#nbaPlayers_paginate > ul > li:nth-child(n) > a:hover {
+    background-color: #0071BC;
 }
 
 .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
     background-color: #0071BC;
-  }
+    color: #ffffff;
+}
