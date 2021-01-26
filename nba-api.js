@@ -2,10 +2,19 @@ const axios = require('axios');
 const Team = require('./models/teams');
 const Player = require('./models/players')
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 const API_URL = 'https://www.balldontlie.io/api/v1/';
 
-mongoose.connect('mongodb+srv://trasik:rhino1234@cluster0.vmwam.mongodb.net/FantasyApp?retryWrites=true&w=majority', {
+const DB_CONNECTION = {
+    name: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    pass: process.env.DB_PASS
+};
+
+const DB_URL = `mongodb+srv://${DB_CONNECTION.user}:${DB_CONNECTION.pass}@cluster0.vmwam.mongodb.net/${DB_CONNECTION.name}?retryWrites=true&w=majority`;
+
+mongoose.connect(DB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }, () => {
