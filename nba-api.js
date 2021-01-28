@@ -1,6 +1,7 @@
 const axios = require('axios');
 const Team = require('./models/teams');
-const Player = require('./models/players')
+const Player = require('./models/players');
+const SeasonAvg = require('./models/seasonavgs');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -88,4 +89,56 @@ async function addAllPlayers() {
         }, i * 5000);
     }
     console.log('Adding all players done.');
+}
+
+async function addAllPlayerSeasonAveragesBySeason(season) {
+    const seasonUrl = `${API_URL}season_averages?season=${season}&player_ids[]=`;
+    const players = await Player.find();
+    let playerIDs = [];
+    for(const player of players) {
+        playerIDs.push(player.playerNumber);
+    }
+    const midpoint = Math.ceil(playerIDs.length / 2);
+    const playerIDs1 = playerIDs.slice(0, midpoint);
+    const playerIDs2 = playerIDs.slice(midpoint, playerIDs.length);
+    const playerIDsArr = [ playerIDs1, playerIDs2];
+    const seasonNumber = `${season}-${String(Number(season) + 1)}`;
+    for(const arr of playerIDsArr) {
+        const tempUrl = seasonUrl + arr.toString();
+        const result = await axios.get(tempUrl);
+        const data = result.data.data;
+        if(data.length == 0) {
+            continue;
+        } else {
+            for(const element of result.data.data) {
+                const seasonAvg = new SeasonAvg({
+                    seasonNumber: seasonNumber,
+                    games_played: element.games_played,
+                    player_id: element.player_id,
+                    season: element.season,
+                    min: element.min,
+                    fgm: element.fgm,
+                    fga: element.fga,
+                    fg3m: element.fg3m,
+                    fg3a: element.fg3a,
+                    ftm: element.ftm,
+                    fta: element.fta,
+                    oreb: element.oreb,
+                    dreb: element.dreb,
+                    reb: element.reb,
+                    ast: element.ast,
+                    stl: element.stl,
+                    blk: element.blk,
+                    turnover: element.turnover,
+                    pf: element.pf,
+                    pts: element.pts,
+                    fg_pct: element.fg_pct,
+                    fg3_pct: element.fg3_pct,
+                    ft_pct: element.ft_pct
+                });
+                await seasonAvg.save();
+                console.log(`Saved Season Average of Player ID ${seasonAvg.player_id} for Season ${seasonAvg.seasonNumber} to database.`);
+            }
+        }
+    }
 }
