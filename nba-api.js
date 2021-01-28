@@ -2,25 +2,32 @@ const axios = require('axios');
 const Team = require('./models/teams');
 const Player = require('./models/players');
 const SeasonAvg = require('./models/seasonavgs');
+const SeasonStats = require('./models/seasonstats');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
 const API_URL = 'https://www.balldontlie.io/api/v1/';
 
-const DB_CONNECTION = {
-    name: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    pass: process.env.DB_PASS
-};
-
-const DB_URL = `mongodb+srv://${DB_CONNECTION.user}:${DB_CONNECTION.pass}@cluster0.vmwam.mongodb.net/${DB_CONNECTION.name}?retryWrites=true&w=majority`;
-
-mongoose.connect(DB_URL, {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
-}, () => {
-   console.log("Connected to database.");
+    useUnifiedTopology: true,
+    useFindAndModify: false
 });
+const db = mongoose.connection;
+const gracefulExit = function() { 
+    db.close(function () {
+        console.log('Mongoose default connection with the Database disconnected through app termination.');
+        process.exit(0);
+    });
+}
+
+db.on('error', (error) => {
+    console.error(`Something went wrong with the database: ${error}`);
+});
+db.once('open', () => {
+    console.log('Connected to the database.');
+});
+process.on('SIGINT', gracefulExit).on('SIGTERM', gracefulExit);
 
 
 async function addAllTeams() {
@@ -142,3 +149,169 @@ async function addAllPlayerSeasonAveragesBySeason(season) {
         }
     }
 }
+
+async function addAllPlayerSeasonStatsBySeason(season) {
+    const statsUrl = API_URL + `stats?seasons[]=${season}&per_page=100`;
+    let totalPages;
+    try {
+        const { data } = await axios.get(statsUrl);
+        totalPages = data.meta.total_pages;
+    } catch (err) {
+        console.log(err);
+    }
+    for(let i = 1; i <= totalPages; i++) {
+        setTimeout(async function addPlayerStats() {
+            const tempURL = statsUrl + '&page=' + String(i);
+            try {
+                const result = await axios.get(tempURL);
+                for (const element of result.data.data) {
+                    const playerID = element.player.id;
+                    const filter = {"player.id": playerID, "game.season": season};
+                    const check = await SeasonStats.find(filter);
+                    if(check.length == 0) {
+                        const seasonstats = new SeasonStats({
+                            ast: element.ast,
+                            blk: element.blk,
+                            dreb: element.dreb,
+                            fg3_pct: element.fg3_pct,
+                            fg3a: element.fg3a,
+                            fg3m: element.fg3m,
+                            fg_pct: element.fg_pct,
+                            fga: element.fga,
+                            fgm: element.fgm,
+                            ft_pct: element.ft_pct,
+                            fta: element.fta,
+                            ftm: element.ftm,
+                            game: element.game,
+                            min: element.min,
+                            oreb: element.oreb,
+                            pf: element.pf,
+                            player: element.player,
+                            pts: element.pts,
+                            reb: element.reb,
+                            stl: element.stl,
+                            team: element.team,
+                            turnover: element.turnover,
+                            games_played: 1
+                        });
+                        await seasonstats.save();
+                        console.log(`Saved Stats for Player ID ${seasonstats.player.id} for Season ${season} to database.`);
+                    } else {
+                        const update = {
+                            ast: check[0]._doc.ast + element.ast,
+                            blk: check[0]._doc.blk + element.blk,
+                            dreb: check[0]._doc.dreb + element.dreb,
+                            fg3_pct: check[0]._doc.fg3_pct + element.fg3_pct,
+                            fg3a: check[0]._doc.fg3a + element.fg3a,
+                            fg3m: check[0]._doc.fg3m + element.fg3m,
+                            fg_pct: check[0]._doc.fg_pct + element.fg_pct,
+                            fga: check[0]._doc.fga + element.fga,
+                            fgm: check[0]._doc.fgm + element.fgm,
+                            ft_pct: check[0]._doc.ft_pct + element.ft_pct,
+                            fta: check[0]._doc.fta + element.fta,
+                            ftm: check[0]._doc.ftm + element.ftm,
+                            min: check[0]._doc.min + element.min,
+                            game: element.game,
+                            oreb: check[0]._doc.oreb + element.oreb,
+                            pf: check[0]._doc.pf + element.pf,
+                            pts: check[0]._doc.pts + element.pts,
+                            reb: check[0]._doc.reb + element.reb,
+                            stl: check[0]._doc.stl + element.stl,
+                            turnover: check[0]._doc.turnover + element.turnover,
+                            games_played: check[0]._doc.games_played + 1
+                        }
+                        await SeasonStats.findOneAndUpdate(filter, update);
+                        console.log(`Updated Stats for Player ID ${check[0]._doc.player.id} for Season ${season} to database.`);
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }, i * 5000);
+    }
+}
+
+async function addAllPlayerSeasonStatsByDate(start_date, end_date) {
+    const statsUrl = API_URL + `stats?start_date=${start_date}&end_date=${end_date}&per_page=100`;
+    let totalPages;
+    try {
+        const { data } = await axios.get(statsUrl);
+        totalPages = data.meta.total_pages;
+    } catch (err) {
+        console.log(err);
+    }
+    for(let i = 1; i <= totalPages; i++) {
+        setTimeout(async function addPlayerStats() {
+            const tempURL = statsUrl + '&page=' + String(i);
+            try {
+                const result = await axios.get(tempURL);
+                for (const element of result.data.data) {
+                    const playerID = element.player.id;
+                    const filter = {"player.id": playerID, "game.season": season};
+                    const check = await SeasonStats.find(filter);
+                    if(check.length == 0) {
+                        const seasonstats = new SeasonStats({
+                            ast: element.ast,
+                            blk: element.blk,
+                            dreb: element.dreb,
+                            fg3_pct: element.fg3_pct,
+                            fg3a: element.fg3a,
+                            fg3m: element.fg3m,
+                            fg_pct: element.fg_pct,
+                            fga: element.fga,
+                            fgm: element.fgm,
+                            ft_pct: element.ft_pct,
+                            fta: element.fta,
+                            ftm: element.ftm,
+                            game: element.game,
+                            min: element.min,
+                            oreb: element.oreb,
+                            pf: element.pf,
+                            player: element.player,
+                            pts: element.pts,
+                            reb: element.reb,
+                            stl: element.stl,
+                            team: element.team,
+                            turnover: element.turnover,
+                            games_played: 1
+                        });
+                        await seasonstats.save();
+                        console.log(`Saved Stats for Player ID ${seasonstats.player.id} for Season ${season} to database.`);
+                    } else {
+                        const update = {
+                            ast: check[0]._doc.ast + element.ast,
+                            blk: check[0]._doc.blk + element.blk,
+                            dreb: check[0]._doc.dreb + element.dreb,
+                            fg3_pct: check[0]._doc.fg3_pct + element.fg3_pct,
+                            fg3a: check[0]._doc.fg3a + element.fg3a,
+                            fg3m: check[0]._doc.fg3m + element.fg3m,
+                            fg_pct: check[0]._doc.fg_pct + element.fg_pct,
+                            fga: check[0]._doc.fga + element.fga,
+                            fgm: check[0]._doc.fgm + element.fgm,
+                            ft_pct: check[0]._doc.ft_pct + element.ft_pct,
+                            fta: check[0]._doc.fta + element.fta,
+                            ftm: check[0]._doc.ftm + element.ftm,
+                            min: check[0]._doc.min + element.min,
+                            game: element.game,
+                            oreb: check[0]._doc.oreb + element.oreb,
+                            pf: check[0]._doc.pf + element.pf,
+                            pts: check[0]._doc.pts + element.pts,
+                            reb: check[0]._doc.reb + element.reb,
+                            stl: check[0]._doc.stl + element.stl,
+                            turnover: check[0]._doc.turnover + element.turnover,
+                            games_played: check[0]._doc.games_played + 1
+                        }
+                        await SeasonStats.findOneAndUpdate(filter, update);
+                        console.log(`Updated Stats for Player ID ${check[0]._doc.player.id} for Season ${season} to database.`);
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }, i * 5000);
+    }
+}
+
+//TODO: SEASONS 2019-1998
+//addAllPlayerSeasonStatsBySeason('2020');
+//addAllPlayerSeasonStatsByDate('2021-01-01', '2021-01-27');

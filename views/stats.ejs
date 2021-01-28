@@ -15,26 +15,71 @@
                 <%- include('./templates/_nbaRouteButtons.ejs') %>
             </div>
         </div>
-        <h1 class="text-center">
-            Player Stats: 
-        </h1>
-        <div class="row">
-         <% seasonAvgs.forEach(seasonAvgs => { %>
+        <div class="container-fluid">
+            <h1 class="text-center">
+                Player Stats: 
+            </h1>
+            <div class="row">
+                <h3 class="text-center">
+                    Season Leaders 
+                </h3>
                 <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                     <div class="card mt-3">
-                      <div class="card-body">
-                        <h5 class="card-title text-center"><%= seasonAvgs.player_id + " " + stats.player_id%></h5>
-                        <h6 class = "card-title text-center"><%= "Position: " + seasonAvgs.player_id %></h6>
-                        <h6 class = "card-title text-center"><%= seasonAvgs.games_played %></h6>
-                        <div class = "row">
-                            <div class ="card-body">
-                                
+                        <div class="card-body">
+                            <h5 class="card-title text-center text-uppercase">Total Points</h5>
+                            <div class="col-12 mt-3">
+                                <% pointsSeasonLeaders.forEach(leader => { %>
+                                    <div class="row justify-content-between mt-3">
+                                        <div class="col-10">
+                                            <p class="card-text mt-1"><%= leader.player.first_name %> <%= leader.player.last_name %></p>
+                                        </div>
+                                        <div class="col-2">
+                                            <p class="card-text mt-1"><%= leader.pts %></p>
+                                        </div>
+                                    </div>
+                                <% }) %>
                             </div>
                         </div>
-                      </div>
                     </div>
                 </div>
-            <% }) %>
+                <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-center text-uppercase">Total Rebounds</h5>
+                            <div class="col-12 mt-3">
+                                <% reboundsSeasonLeaders.forEach(leader => { %>
+                                    <div class="row justify-content-between mt-3">
+                                        <div class="col-10">
+                                            <p class="card-text mt-1"><%= leader.player.first_name %> <%= leader.player.last_name %></p>
+                                        </div>
+                                        <div class="col-2">
+                                            <p class="card-text mt-1"><%= leader.reb %></p>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-center text-uppercase">Total Assists</h5>
+                            <div class="col-12 mt-3">
+                                <% assistsSeasonLeaders.forEach(leader => { %>
+                                    <div class="row justify-content-between mt-3">
+                                        <div class="col-10">
+                                            <p class="card-text mt-1"><%= leader.player.first_name %> <%= leader.player.last_name %></p>
+                                        </div>
+                                        <div class="col-2">
+                                            <p class="card-text mt-1"><%= leader.ast %></p>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>

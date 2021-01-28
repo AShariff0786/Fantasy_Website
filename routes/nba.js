@@ -2,25 +2,34 @@ const express = require('express');
 const mongoose = require('mongoose');
 const Team = require('../models/teams');
 const Player = require('../models/players');
+const SeasonAvg = require('../models/seasonavgs');
+const SeasonStats = require('../models/seasonstats');
 const axios = require('axios');
 const router = express.Router();
 require('dotenv').config();
 
 const API_URL = 'https://www.balldontlie.io/api/v1/';
-const DB_CONNECTION = {
-    name: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    pass: process.env.DB_PASS
-};
-const DB_URL = `mongodb+srv://${DB_CONNECTION.user}:${DB_CONNECTION.pass}@cluster0.vmwam.mongodb.net/${DB_CONNECTION.name}?retryWrites=true&w=majority`;
 
-
-mongoose.connect(DB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}, () => {
-   console.log("Connected to database.");
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
+
+const db = mongoose.connection;
+const gracefulExit = function() { 
+    db.close(function () {
+        console.log('Mongoose default connection with the Database disconnected through app termination.');
+        process.exit(0);
+    });
+}
+
+db.on('error', (error) => {
+    console.error(`Something went wrong with the database: ${error}`);
+});
+db.once('open', () => {
+    console.log('Connected to the database.');
+});
+process.on('SIGINT', gracefulExit).on('SIGTERM', gracefulExit);
 
 function getDate() {
     var d = new Date(),
@@ -41,23 +50,21 @@ router.get('/', async(req, res) => {
 });
 
 router.get('/stats', async (req, res, next) => {
-    seasonAvgURL = API_URL + 'season_averages';
-    playersURL = API_URL + 'players';
-    let seasonAvgData, playersData;
-    try {
-        const { data } = await axios.get(seasonAvgURL);
-        seasonAvgData = data.data;
-    } catch (err) {
-        next(err);
-    }
-    try {
-        const { data } = await axios.get(playersURL);
-        playersData = data.data;
-    } catch (err) {
-        next(err);
-    }
-
-    res.render('stats.ejs', JSON.stringify( { players: playersData, seasonAvgs: seasonAvgData}));
+    const seasonstats = await SeasonStats.find({"game.season": 2020});
+    const pointsSeasonLeaders = seasonstats.sort(function(a, b) {
+        return b.pts - a.pts;
+    }).slice(0, 5);
+    const reboundsSeasonLeaders = seasonstats.sort(function(a, b) {
+        return b.reb - a.reb;
+    }).slice(0, 5);
+    const assistsSeasonLeaders = seasonstats.sort(function(a, b) {
+        return b.ast - a.ast;
+    }).slice(0, 5);
+    res.render('stats.ejs', { 
+        pointsSeasonLeaders: pointsSeasonLeaders,
+        reboundsSeasonLeaders: reboundsSeasonLeaders,
+        assistsSeasonLeaders: assistsSeasonLeaders
+    });
 });
 
 router.get('/players', async (req, res, next) => {
@@ -68,18 +75,6 @@ router.get('/players', async (req, res, next) => {
         next(err);
     }
     res.render('players.ejs', {players: playersData});
-});
-
-router.get('/playerstats', async (req, res, next) => {
-    statsURL = API_URL + 'stats';
-    let statsData;
-    try {
-        const { data } = await axios.get(statsURL);
-        statsData = data.data;
-    } catch (err) {
-        next(err);
-    }
-    res.render('playersStats.ejs', {stats: statsData});
 });
 
 router.get('/schedule', async (req, res, next) => {
