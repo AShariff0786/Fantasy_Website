@@ -4,7 +4,7 @@ const Player = require('./models/players');
 const SeasonAvg = require('./models/seasonavgs');
 const SeasonStats = require('./models/seasonstats');
 const SeasonStatsTotal = require('./models/seasonstatstotal');
-const knicksSeasonStats = require('../models/knicksSeasonStats');
+const knicksSeasonStats = require('./models/knicksSeasonStats');
 const TeamGame = require('./models/teamgames');
 const mongoose = require('mongoose');
 require('dotenv').config();
@@ -338,7 +338,7 @@ async function addAllPlayersSeasonStatsTotals(season) {
     }
 }
 
-async function knicksSeasonStats(season) {
+async function knicksStats(season) {
      const teamGamesUrl = API_URL + `games?seasons[]=${season}&team_ids[]=20`;
         setTimeout(async function addPlayers() {
             const tempUrl = teamGamesUrl + '&per_page=100';
@@ -356,7 +356,7 @@ async function knicksSeasonStats(season) {
             } catch (error) {
                 console.error(error);
             }
-        }, i * 5000);
+        }, 20 * 5000);
     
 }
 
@@ -367,3 +367,4 @@ async function knicksSeasonStats(season) {
 //addAllPlayerSeasonStatsByDate('2021-01-28');
 //addAllTeamGames('2020');
 //addAllPlayersSeasonStatsTotals('2020');
+knicksStats('2020');
