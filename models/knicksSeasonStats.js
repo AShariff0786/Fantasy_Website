@@ -36,4 +36,4 @@ const knicksSchema = new mongoose.Schema({
     game: gameSchema
 });
 
-module.exports = mongoose.model('knicksSeasonStats', knicksSchema);
+module.exports = mongoose.model('Knicks', knicksSchema);

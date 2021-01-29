@@ -4,6 +4,7 @@ const Player = require('./models/players');
 const SeasonAvg = require('./models/seasonavgs');
 const SeasonStats = require('./models/seasonstats');
 const SeasonStatsTotal = require('./models/seasonstatstotal');
+const knicksSeasonStats = require('../models/knicksSeasonStats');
 const TeamGame = require('./models/teamgames');
 const mongoose = require('mongoose');
 require('dotenv').config();
@@ -335,6 +336,28 @@ async function addAllPlayersSeasonStatsTotals(season) {
             console.log(`Adding Stats for Player ID ${check[0]._doc.player.id} for Season ${season} Totals to database.`);
         }
     }
+}
+
+async function knicksSeasonStats(season) {
+     const teamGamesUrl = API_URL + `games?seasons[]=${season}&team_ids[]=20`;
+        setTimeout(async function addPlayers() {
+            const tempUrl = teamGamesUrl + '&per_page=100';
+            try {
+                const result = await axios.get(tempUrl);
+                for(const element of result.data.data) {
+                    const knicksSeasonStats = new Knicks({
+                        teamNumber: 20,
+                        game: element
+                    });
+                    await teamgame.save();
+                    console.log(`Saved a game for team ID ${20} for the ${season} Season.`);
+                }
+
+            } catch (error) {
+                console.error(error);
+            }
+        }, i * 5000);
+    
 }
 
 //TODO: SEASONS 2019-1998
