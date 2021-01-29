@@ -20,7 +20,7 @@
             <h1 class="text-center">
                 Player Stats: 
             </h1>
-            <div class="playerTable">
+            <div style="display:none" class="playerTable">
                 <table id="nbaPlayers" class="table table-hover">
                     <thead>
                       <tr>
@@ -53,7 +53,12 @@
         <script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap5.min.js"></script>
         <script>
             $(document).ready(function () {
-                $('#nbaPlayers').DataTable();
+                $('#nbaPlayers').DataTable({
+                    "order": [[3, 'desc' ]],
+                    "initComplete": function(settings, json) {
+                        $('.playerTable').show();
+                    }
+                });
             });
         </script>
     </body>
