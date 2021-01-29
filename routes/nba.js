@@ -5,6 +5,7 @@ const Player = require('../models/players');
 const SeasonAvg = require('../models/seasonavgs');
 const SeasonStats = require('../models/seasonstats');
 const SeasonStatsTotal = require('../models/seasonstatstotal');
+const knicksSeasonStats = require('../models/knicksSeasonStats');
 const axios = require('axios');
 const router = express.Router();
 require('dotenv').config();
@@ -148,6 +149,11 @@ router.get('/schedule', async (req, res, next) => {
 router.get('/teams', async (req, res, next) => {
     const teamsData = await Team.find();
     res.render('teams.ejs', {teams: teamsData});
+});
+
+router.get('/standings', async (req, res, next) => {
+    const knicksData = await knicksSeasonStats.find();
+    res.render('standings.ejs', {knicks: knicksData});
 });
 
 module.exports = router;
