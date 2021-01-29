@@ -2,11 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\models",
-    "\\public",
-    "\\public\\css",
     "\\routes",
     "\\views"
   ],
-  "SelectedNode": "\\routes\\nba.js",
+  "SelectedNode": "\\models\\seasonstatstotal.js",
   "PreviewInSolutionExplorer": false
 }
