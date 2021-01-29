@@ -1,10 +1,12 @@
 {
   "ExpandedNodes": [
     "",
+    "\\models",
     "\\public",
     "\\public\\css",
+    "\\routes",
     "\\views"
   ],
-  "SelectedNode": "\\.gitignore",
+  "SelectedNode": "\\routes\\nba.js",
   "PreviewInSolutionExplorer": false
 }
