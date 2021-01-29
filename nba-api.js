@@ -349,7 +349,7 @@ async function knicksSeasonStats(season) {
                         teamNumber: 20,
                         game: element
                     });
-                    await teamgame.save();
+                    await knicksSeasonStats.save();
                     console.log(`Saved a game for team ID ${20} for the ${season} Season.`);
                 }
 
