@@ -35,7 +35,7 @@ const teamSchema = new mongoose.Schema({
     name: String
 });
 
-const seasonStatsSchema = new mongoose.Schema({
+const seasonStatsTotalSchema = new mongoose.Schema({
     ast: Number,
     blk: Number,
     dreb: Number,
@@ -58,6 +58,7 @@ const seasonStatsSchema = new mongoose.Schema({
     stl: Number,
     team: teamSchema,
     turnover: Number,
+    games_played: Number
 });
 
-module.exports = mongoose.model('SeasonStats', seasonStatsSchema);
+module.exports = mongoose.model('SeasonStatsTotal', seasonStatsTotalSchema);

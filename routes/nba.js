@@ -4,6 +4,7 @@ const Team = require('../models/teams');
 const Player = require('../models/players');
 const SeasonAvg = require('../models/seasonavgs');
 const SeasonStats = require('../models/seasonstats');
+const SeasonStatsTotal = require('../models/seasonstatstotal');
 const axios = require('axios');
 const router = express.Router();
 require('dotenv').config();
@@ -45,25 +46,71 @@ function getDate() {
     return [year, month, day].join('-');
 }
 
+function calculateSeasonAverage(totals) {
+    const seasonAverageArr = [];
+    for(const total of totals) {
+        const temp = total;
+        const games_played = temp.games_played;
+        temp.pts = (temp.pts / games_played).toFixed(1);
+        temp.fgm = (temp.fgm / games_played).toFixed(1);
+        temp.fga = (temp.fga / games_played).toFixed(1);
+        temp.fg_pct = (temp.fg_pct / games_played).toFixed(1);
+        temp.fg3m = (temp.fg3m / games_played).toFixed(1);
+        temp.fg3a = (temp.fg3a / games_played).toFixed(1);
+        temp.fg3_pct = (temp.fg3_pct / games_played).toFixed(1);
+        temp.ftm = (temp.ftm / games_played).toFixed(1);
+        temp.fta = (temp.fta / games_played).toFixed(1);
+        temp.ft_pct = (temp.ft_pct / games_played).toFixed(1);
+        temp.oreb = (temp.oreb / games_played).toFixed(1);
+        temp.dreb = (temp.dreb / games_played).toFixed(1);
+        temp.reb = (temp.reb / games_played).toFixed(1);
+        temp.ast = (temp.ast / games_played).toFixed(1);
+        temp.turnover = (temp.turnover / games_played).toFixed(1);
+        temp.stl = (temp.stl / games_played).toFixed(1);
+        temp.blk = (temp.blk / games_played).toFixed(1);
+        temp.pf = (temp.pf / games_played).toFixed(1);
+        seasonAverageArr.push(temp);
+    }
+    return seasonAverageArr;
+}
+
 router.get('/', async(req, res) => {
     res.render('nba.ejs');
 });
 
 router.get('/stats', async (req, res, next) => {
-    const seasonstats = await SeasonStats.find({"game.season": 2020});
-    const pointsSeasonLeaders = seasonstats.sort(function(a, b) {
+    const seasonstatstotals = await SeasonStatsTotal.find({"game.season": 2020});
+    const pointsSeasonLeaders = seasonstatstotals.sort(function(a, b) {
         return b.pts - a.pts;
     }).slice(0, 5);
-    const reboundsSeasonLeaders = seasonstats.sort(function(a, b) {
+    const reboundsSeasonLeaders = seasonstatstotals.sort(function(a, b) {
         return b.reb - a.reb;
     }).slice(0, 5);
-    const assistsSeasonLeaders = seasonstats.sort(function(a, b) {
+    const assistsSeasonLeaders = seasonstatstotals.sort(function(a, b) {
         return b.ast - a.ast;
     }).slice(0, 5);
-    res.render('stats.ejs', { 
+    const blocksSeasonLeaders = seasonstatstotals.sort(function(a, b) {
+        return b.blk - a.blk;
+    }).slice(0, 5);
+    const stealsSeasonLeaders = seasonstatstotals.sort(function(a, b) {
+        return b.stl - a.stl;
+    }).slice(0, 5);
+    const threePointersMadeSeasonLeaders = seasonstatstotals.sort(function(a, b) {
+        return b.fg3m - a.fg3m;
+    }).slice(0, 5);
+
+    const seasonAvg = calculateSeasonAverage(seasonstatstotals);
+    seasonAvg.sort(function(a, b) {
+        return b.pts - a.pts;
+    });
+    res.render('stats.ejs', {
         pointsSeasonLeaders: pointsSeasonLeaders,
         reboundsSeasonLeaders: reboundsSeasonLeaders,
-        assistsSeasonLeaders: assistsSeasonLeaders
+        assistsSeasonLeaders: assistsSeasonLeaders,
+        blocksSeasonLeaders: blocksSeasonLeaders,
+        stealsSeasonLeaders: stealsSeasonLeaders,
+        threePointersMadeSeasonLeaders: threePointersMadeSeasonLeaders,
+        seasonAvg: seasonAvg
     });
 });
 

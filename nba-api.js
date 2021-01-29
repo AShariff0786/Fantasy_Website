@@ -3,6 +3,8 @@ const Team = require('./models/teams');
 const Player = require('./models/players');
 const SeasonAvg = require('./models/seasonavgs');
 const SeasonStats = require('./models/seasonstats');
+const SeasonStatsTotal = require('./models/seasonstatstotal');
+const TeamGame = require('./models/teamgames');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -165,64 +167,32 @@ async function addAllPlayerSeasonStatsBySeason(season) {
             try {
                 const result = await axios.get(tempURL);
                 for (const element of result.data.data) {
-                    const playerID = element.player.id;
-                    const filter = {"player.id": playerID, "game.season": season};
-                    const check = await SeasonStats.find(filter);
-                    if(check.length == 0) {
-                        const seasonstats = new SeasonStats({
-                            ast: element.ast,
-                            blk: element.blk,
-                            dreb: element.dreb,
-                            fg3_pct: element.fg3_pct,
-                            fg3a: element.fg3a,
-                            fg3m: element.fg3m,
-                            fg_pct: element.fg_pct,
-                            fga: element.fga,
-                            fgm: element.fgm,
-                            ft_pct: element.ft_pct,
-                            fta: element.fta,
-                            ftm: element.ftm,
-                            game: element.game,
-                            min: element.min,
-                            oreb: element.oreb,
-                            pf: element.pf,
-                            player: element.player,
-                            pts: element.pts,
-                            reb: element.reb,
-                            stl: element.stl,
-                            team: element.team,
-                            turnover: element.turnover,
-                            games_played: 1
-                        });
-                        await seasonstats.save();
-                        console.log(`Saved Stats for Player ID ${seasonstats.player.id} for Season ${season} to database.`);
-                    } else {
-                        const update = {
-                            ast: check[0]._doc.ast + element.ast,
-                            blk: check[0]._doc.blk + element.blk,
-                            dreb: check[0]._doc.dreb + element.dreb,
-                            fg3_pct: check[0]._doc.fg3_pct + element.fg3_pct,
-                            fg3a: check[0]._doc.fg3a + element.fg3a,
-                            fg3m: check[0]._doc.fg3m + element.fg3m,
-                            fg_pct: check[0]._doc.fg_pct + element.fg_pct,
-                            fga: check[0]._doc.fga + element.fga,
-                            fgm: check[0]._doc.fgm + element.fgm,
-                            ft_pct: check[0]._doc.ft_pct + element.ft_pct,
-                            fta: check[0]._doc.fta + element.fta,
-                            ftm: check[0]._doc.ftm + element.ftm,
-                            min: check[0]._doc.min + element.min,
-                            game: element.game,
-                            oreb: check[0]._doc.oreb + element.oreb,
-                            pf: check[0]._doc.pf + element.pf,
-                            pts: check[0]._doc.pts + element.pts,
-                            reb: check[0]._doc.reb + element.reb,
-                            stl: check[0]._doc.stl + element.stl,
-                            turnover: check[0]._doc.turnover + element.turnover,
-                            games_played: check[0]._doc.games_played + 1
-                        }
-                        await SeasonStats.findOneAndUpdate(filter, update);
-                        console.log(`Updated Stats for Player ID ${check[0]._doc.player.id} for Season ${season} to database.`);
-                    }
+                    const seasonstats = new SeasonStats({
+                        ast: element.ast,
+                        blk: element.blk,
+                        dreb: element.dreb,
+                        fg3_pct: element.fg3_pct,
+                        fg3a: element.fg3a,
+                        fg3m: element.fg3m,
+                        fg_pct: element.fg_pct,
+                        fga: element.fga,
+                        fgm: element.fgm,
+                        ft_pct: element.ft_pct,
+                        fta: element.fta,
+                        ftm: element.ftm,
+                        game: element.game,
+                        min: element.min,
+                        oreb: element.oreb,
+                        pf: element.pf,
+                        player: element.player,
+                        pts: element.pts,
+                        reb: element.reb,
+                        stl: element.stl,
+                        team: element.team,
+                        turnover: element.turnover
+                    });
+                    await seasonstats.save();
+                    console.log(`Saved Stats for Player ID ${seasonstats.player.id} for Season ${season} to database.`);
                 }
             } catch (err) {
                 console.error(err);
@@ -231,8 +201,8 @@ async function addAllPlayerSeasonStatsBySeason(season) {
     }
 }
 
-async function addAllPlayerSeasonStatsByDate(start_date, end_date) {
-    const statsUrl = API_URL + `stats?start_date=${start_date}&end_date=${end_date}&per_page=100`;
+async function addAllPlayerSeasonStatsByDate(date) {
+    const statsUrl = API_URL + `stats?per_page=100&dates[]=${date}`;
     let totalPages;
     try {
         const { data } = await axios.get(statsUrl);
@@ -246,64 +216,32 @@ async function addAllPlayerSeasonStatsByDate(start_date, end_date) {
             try {
                 const result = await axios.get(tempURL);
                 for (const element of result.data.data) {
-                    const playerID = element.player.id;
-                    const filter = {"player.id": playerID, "game.season": season};
-                    const check = await SeasonStats.find(filter);
-                    if(check.length == 0) {
-                        const seasonstats = new SeasonStats({
-                            ast: element.ast,
-                            blk: element.blk,
-                            dreb: element.dreb,
-                            fg3_pct: element.fg3_pct,
-                            fg3a: element.fg3a,
-                            fg3m: element.fg3m,
-                            fg_pct: element.fg_pct,
-                            fga: element.fga,
-                            fgm: element.fgm,
-                            ft_pct: element.ft_pct,
-                            fta: element.fta,
-                            ftm: element.ftm,
-                            game: element.game,
-                            min: element.min,
-                            oreb: element.oreb,
-                            pf: element.pf,
-                            player: element.player,
-                            pts: element.pts,
-                            reb: element.reb,
-                            stl: element.stl,
-                            team: element.team,
-                            turnover: element.turnover,
-                            games_played: 1
-                        });
-                        await seasonstats.save();
-                        console.log(`Saved Stats for Player ID ${seasonstats.player.id} for Season ${season} to database.`);
-                    } else {
-                        const update = {
-                            ast: check[0]._doc.ast + element.ast,
-                            blk: check[0]._doc.blk + element.blk,
-                            dreb: check[0]._doc.dreb + element.dreb,
-                            fg3_pct: check[0]._doc.fg3_pct + element.fg3_pct,
-                            fg3a: check[0]._doc.fg3a + element.fg3a,
-                            fg3m: check[0]._doc.fg3m + element.fg3m,
-                            fg_pct: check[0]._doc.fg_pct + element.fg_pct,
-                            fga: check[0]._doc.fga + element.fga,
-                            fgm: check[0]._doc.fgm + element.fgm,
-                            ft_pct: check[0]._doc.ft_pct + element.ft_pct,
-                            fta: check[0]._doc.fta + element.fta,
-                            ftm: check[0]._doc.ftm + element.ftm,
-                            min: check[0]._doc.min + element.min,
-                            game: element.game,
-                            oreb: check[0]._doc.oreb + element.oreb,
-                            pf: check[0]._doc.pf + element.pf,
-                            pts: check[0]._doc.pts + element.pts,
-                            reb: check[0]._doc.reb + element.reb,
-                            stl: check[0]._doc.stl + element.stl,
-                            turnover: check[0]._doc.turnover + element.turnover,
-                            games_played: check[0]._doc.games_played + 1
-                        }
-                        await SeasonStats.findOneAndUpdate(filter, update);
-                        console.log(`Updated Stats for Player ID ${check[0]._doc.player.id} for Season ${season} to database.`);
-                    }
+                    const seasonstats = new SeasonStats({
+                        ast: element.ast,
+                        blk: element.blk,
+                        dreb: element.dreb,
+                        fg3_pct: element.fg3_pct,
+                        fg3a: element.fg3a,
+                        fg3m: element.fg3m,
+                        fg_pct: element.fg_pct,
+                        fga: element.fga,
+                        fgm: element.fgm,
+                        ft_pct: element.ft_pct,
+                        fta: element.fta,
+                        ftm: element.ftm,
+                        game: element.game,
+                        min: element.min,
+                        oreb: element.oreb,
+                        pf: element.pf,
+                        player: element.player,
+                        pts: element.pts,
+                        reb: element.reb,
+                        stl: element.stl,
+                        team: element.team,
+                        turnover: element.turnover
+                    });
+                    await seasonstats.save();
+                    console.log(`Saved Stats for Player ID ${seasonstats.player.id} for Date ${date} to database.`);
                 }
             } catch (err) {
                 console.error(err);
@@ -312,6 +250,96 @@ async function addAllPlayerSeasonStatsByDate(start_date, end_date) {
     }
 }
 
+async function addAllTeamGames(season) {
+    const teamGamesUrl = API_URL + `games?seasons[]=${season}&team_ids[]=`;
+    for(let i = 1; i <= 30; i++) {
+        setTimeout(async function addPlayers() {
+            const tempUrl = teamGamesUrl + String(i) + '&per_page=100';
+            try {
+                const result = await axios.get(tempUrl);
+                for(const element of result.data.data) {
+                    const teamgame = new TeamGame({
+                        teamNumber: i,
+                        game: element
+                    });
+                    await teamgame.save();
+                    console.log(`Saved a game for team ID ${i} for the ${season} Season.`);
+                }
+
+            } catch (error) {
+                console.error(error);
+            }
+        }, i * 5000);
+    }
+}
+
+async function addAllPlayersSeasonStatsTotals(season) {
+    const seasonStats = await SeasonStats.find({"game.season": season});
+    for(const element of seasonStats) {
+        const playerID = element.player.id;
+        const filter = {"player.id": playerID, "game.season": season};
+        const check = await SeasonStatsTotal.find(filter);
+        if(check.length == 0) {
+            const seasonstatstotal = new SeasonStatsTotal({
+                ast: element.ast,
+                blk: element.blk,
+                dreb: element.dreb,
+                fg3_pct: element.fg3_pct,
+                fg3a: element.fg3a,
+                fg3m: element.fg3m,
+                fg_pct: element.fg_pct,
+                fga: element.fga,
+                fgm: element.fgm,
+                ft_pct: element.ft_pct,
+                fta: element.fta,
+                ftm: element.ftm,
+                game: element.game,
+                min: element.min,
+                oreb: element.oreb,
+                pf: element.pf,
+                player: element.player,
+                pts: element.pts,
+                reb: element.reb,
+                stl: element.stl,
+                team: element.team,
+                turnover: element.turnover,
+                games_played: 1
+            });
+            await seasonstatstotal.save();
+            console.log(`Saved Stats for Player ID ${seasonstatstotal.player.id} for Season ${season} to database.`);
+        } else {
+            const update = {
+                ast: check[0]._doc.ast + element.ast,
+                blk: check[0]._doc.blk + element.blk,
+                dreb: check[0]._doc.dreb + element.dreb,
+                fg3_pct: check[0]._doc.fg3_pct + element.fg3_pct,
+                fg3a: check[0]._doc.fg3a + element.fg3a,
+                fg3m: check[0]._doc.fg3m + element.fg3m,
+                fg_pct: check[0]._doc.fg_pct + element.fg_pct,
+                fga: check[0]._doc.fga + element.fga,
+                fgm: check[0]._doc.fgm + element.fgm,
+                ft_pct: check[0]._doc.ft_pct + element.ft_pct,
+                fta: check[0]._doc.fta + element.fta,
+                ftm: check[0]._doc.ftm + element.ftm,
+                min: check[0]._doc.min + element.min,
+                game: element.game,
+                oreb: check[0]._doc.oreb + element.oreb,
+                pf: check[0]._doc.pf + element.pf,
+                pts: check[0]._doc.pts + element.pts,
+                reb: check[0]._doc.reb + element.reb,
+                stl: check[0]._doc.stl + element.stl,
+                turnover: check[0]._doc.turnover + element.turnover,
+                games_played: check[0]._doc.games_played + 1
+            }
+            await SeasonStatsTotal.findOneAndUpdate(filter, update);
+            console.log(`Adding Stats for Player ID ${check[0]._doc.player.id} for Season ${season} Totals to database.`);
+        }
+    }
+}
+
 //TODO: SEASONS 2019-1998
+//DONT PASS IN 2020
 //addAllPlayerSeasonStatsBySeason('2020');
-//addAllPlayerSeasonStatsByDate('2021-01-01', '2021-01-27');
+//addAllPlayerSeasonStatsByDate('2021-01-28');
+//addAllTeamGames('2020');
+//addAllPlayersSeasonStatsTotals('2020');
