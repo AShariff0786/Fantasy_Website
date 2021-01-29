@@ -362,6 +362,7 @@ async function knicksSeasonStats(season) {
 
 //TODO: SEASONS 2019-1998
 //DONT PASS IN 2020
+//FOR TEAM GAMES ALL GAMES ARE ADDED TILL "2021-03-04T00:00:00.000Z" NO NEED TO ADD TILL THEN
 //addAllPlayerSeasonStatsBySeason('2020');
 //addAllPlayerSeasonStatsByDate('2021-01-28');
 //addAllTeamGames('2020');
