@@ -5,7 +5,6 @@ const Player = require('../models/players');
 const SeasonAvg = require('../models/seasonavgs');
 const SeasonStats = require('../models/seasonstats');
 const SeasonStatsTotal = require('../models/seasonstatstotal');
-const knicksSeasonStats = require('../models/knicksSeasonStats');
 const axios = require('axios');
 const router = express.Router();
 require('dotenv').config();

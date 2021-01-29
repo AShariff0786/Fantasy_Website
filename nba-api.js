@@ -4,7 +4,6 @@ const Player = require('./models/players');
 const SeasonAvg = require('./models/seasonavgs');
 const SeasonStats = require('./models/seasonstats');
 const SeasonStatsTotal = require('./models/seasonstatstotal');
-const knicksSeasonStats = require('./models/knicksSeasonStats');
 const TeamGame = require('./models/teamgames');
 const mongoose = require('mongoose');
 require('dotenv').config();
@@ -338,33 +337,12 @@ async function addAllPlayersSeasonStatsTotals(season) {
     }
 }
 
-async function knicksStats(season) {
-     const teamGamesUrl = API_URL + `games?seasons[]=${season}&team_ids[]=20`;
-        setTimeout(async function addPlayers() {
-            const tempUrl = teamGamesUrl + '&per_page=100';
-            try {
-                const result = await axios.get(tempUrl);
-                for(const element of result.data.data) {
-                    const knicksSeasonStats = new Knicks({
-                        teamNumber: 20,
-                        game: element
-                    });
-                    await knicksSeasonStats.save();
-                    console.log(`Saved a game for team ID ${20} for the ${season} Season.`);
-                }
 
-            } catch (error) {
-                console.error(error);
-            }
-        }, 20 * 5000);
-    
-}
 
 //TODO: SEASONS 2019-1998
 //DONT PASS IN 2020
 //FOR TEAM GAMES ALL GAMES ARE ADDED TILL "2021-03-04T00:00:00.000Z" NO NEED TO ADD TILL THEN
 //addAllPlayerSeasonStatsBySeason('2020');
 //addAllPlayerSeasonStatsByDate('2021-01-28');
-//addAllTeamGames('2020');
+//addAllTeamGames('2019');
 //addAllPlayersSeasonStatsTotals('2020');
-knicksStats('2020');
