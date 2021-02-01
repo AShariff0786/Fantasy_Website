@@ -174,8 +174,8 @@
                     <tbody>
                         <% seasonAvg.forEach(avg => { %>
                             <tr>
-                                <th scope="row"><%= avg.player.first_name %> <%= avg.player.last_name %></th>
-                                <td><%= avg.team.abbreviation %></td>
+                                <th scope="row"><%= avg.playerdetails[0].first_name %> <%= avg.playerdetails[0].last_name %></th>
+                                <td><%= avg.playerdetails[0].teamAbbreviation %> </td>
                                 <td><%= avg.games_played %></td>
                                 <td><%= avg.pts %></td>
                                 <td><%= avg.fgm %></td>
@@ -209,9 +209,8 @@
         <script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap5.min.js"></script>
         <script>
             $(document).ready(function () {
-                $(document).ready(function () {
-                    $('.cardFade').fadeIn(1000);
-                });
+                $('.cardFade').fadeIn(1000);
+                
                 $('#seasonAvg').DataTable({
                     "order": [[3, 'desc' ]],
                     "initComplete": function(settings, json) {

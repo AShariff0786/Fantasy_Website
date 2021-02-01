@@ -12,27 +12,6 @@ require('dotenv').config();
 
 const API_URL = 'https://www.balldontlie.io/api/v1/';
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-const db = mongoose.connection;
-const gracefulExit = function() { 
-    db.close(function () {
-        console.log('Mongoose default connection with the Database disconnected through app termination.');
-        process.exit(0);
-    });
-}
-
-db.on('error', (error) => {
-    console.error(`Something went wrong with the database: ${error}`);
-});
-db.once('open', () => {
-    console.log('Connected to the database.');
-});
-process.on('SIGINT', gracefulExit).on('SIGTERM', gracefulExit);
-
 function getDate() {
     var d = new Date(),
         month = '' + (d.getMonth() + 1),
@@ -47,32 +26,18 @@ function getDate() {
     return [year, month, day].join('-');
 }
 
-function calculateSeasonAverage(totals) {
-    const seasonAverageArr = [];
-    for(const total of totals) {
-        const temp = total;
-        const games_played = temp.games_played;
-        temp.pts = (temp.pts / games_played).toFixed(1);
-        temp.fgm = (temp.fgm / games_played).toFixed(1);
-        temp.fga = (temp.fga / games_played).toFixed(1);
-        temp.fg_pct = (temp.fg_pct / games_played).toFixed(1);
-        temp.fg3m = (temp.fg3m / games_played).toFixed(1);
-        temp.fg3a = (temp.fg3a / games_played).toFixed(1);
-        temp.fg3_pct = (temp.fg3_pct / games_played).toFixed(1);
-        temp.ftm = (temp.ftm / games_played).toFixed(1);
-        temp.fta = (temp.fta / games_played).toFixed(1);
-        temp.ft_pct = (temp.ft_pct / games_played).toFixed(1);
-        temp.oreb = (temp.oreb / games_played).toFixed(1);
-        temp.dreb = (temp.dreb / games_played).toFixed(1);
-        temp.reb = (temp.reb / games_played).toFixed(1);
-        temp.ast = (temp.ast / games_played).toFixed(1);
-        temp.turnover = (temp.turnover / games_played).toFixed(1);
-        temp.stl = (temp.stl / games_played).toFixed(1);
-        temp.blk = (temp.blk / games_played).toFixed(1);
-        temp.pf = (temp.pf / games_played).toFixed(1);
-        seasonAverageArr.push(temp);
-    }
-    return seasonAverageArr;
+async function joinSeasonAverageAndPlayers() {
+    const result = await SeasonAvg.aggregate([{
+        $match: { season : 2020 }
+        }, {
+        $lookup: {
+            from: 'players',
+            localField: 'player_id',
+            foreignField: 'playerNumber',
+            as: 'playerdetails'
+        }
+    }]);
+    return result;
 }
 
 router.get('/', async(req, res) => {
@@ -100,10 +65,8 @@ router.get('/stats', async (req, res, next) => {
         return b.fg3m - a.fg3m;
     }).slice(0, 5);
 
-    const seasonAvg = calculateSeasonAverage(seasonstatstotals);
-    seasonAvg.sort(function(a, b) {
-        return b.pts - a.pts;
-    });
+    const seasonAvg = await joinSeasonAverageAndPlayers();
+
     res.render('stats.ejs', {
         pointsSeasonLeaders: pointsSeasonLeaders,
         reboundsSeasonLeaders: reboundsSeasonLeaders,

@@ -109,3 +109,24 @@ div.btn-group button:hover {
     background-color: #0071BC;
     color: #ffffff;
 }
+
+#formGroupQueryInput,
+.form-select {
+    background-color: #131313;
+    color: #ffffff;
+}
+
+#formGroupQueryInput::placeholder {
+    color: #ffffff;
+}
+
+#messageDiv {
+    display: none;
+    width: 80%;
+    height: auto;
+    margin: 2rem auto;
+    background-color: #131313;
+    font-size:larger;
+    font-weight: 700;
+    border-radius: 10px;
+}
