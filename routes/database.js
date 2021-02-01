@@ -6,7 +6,7 @@ const SeasonAvg = require('../models/seasonavgs');
 const SeasonStats = require('../models/seasonstats');
 const SeasonStatsTotal = require('../models/seasonstatstotal');
 const TeamGame = require('../models/teamgames');
-const TeamRecord = require('../models/records');
+const Record = require('../models/records');
 const axios = require('axios');
 const router = express.Router();
 require('dotenv').config();
@@ -657,8 +657,6 @@ async function addAllTeamGamesBySeason(season) {
                             const teamgame = new TeamGame({
                                 teamNumber: i,
                                 game: element
-
-                                console.log(element);
                             });
                             await teamgame.save();
                             console.log(`Saved a game for team ID ${i} for the ${season} Season.`);
@@ -699,8 +697,6 @@ async function addAllTeamGamesByDate(date) {
                             await teamgame.save();
                             console.log(`Saved a game for team ID ${i} for the date of ${date}.`);
 
-                             
-
                         }
                     }
                 } catch (error) {
@@ -715,5 +711,52 @@ async function addAllTeamGamesByDate(date) {
         return "error1";
     }
 }
+
+async function updateRecord(season) {
+    if(validateSeason(season)) {
+        for(let i = 1; i <= 30; i++) {
+            const filter = {"teamNumber": i, "game.year": season};
+            const check = await Record.findOne(filter);
+            if(check.length != 0) {
+                const teamGame = await TeamGame.findOne({"game.season" : season});
+                try {
+                    const record = new Record({
+                        teamNumber : i,
+                        year: season,
+                        if(teamGame.game.home_team_score > teamGame.game.visitor_team_score){
+                            win = 1;
+                            loss = 0;
+					    }else{
+                            loss = 1;
+                            win = 0;
+						}
+					});
+
+                    await record.save();
+                    console.log(`Saved new record for team ID ${i} for the ${season} Season.`);
+                                           
+                } catch (error) {
+                    console.error(error);
+                    return "error3";
+                }
+                }else{
+                    const teamGame = await TeamGame.findOne({"game.season" : season});
+                    let update;
+                    update = {
+                        if(teamGame.game.home_team_score > teamGame.game.visitor_team_score){
+                            win = check.win + 1;
+					    }else{
+                            loss = check.loss + 1;
+						}
+					}
+				}
+            }
+        }
+    } else {
+        return "error1";
+    }
+}
+
+updateRecord (2019);
 
 module.exports = router;

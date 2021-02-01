@@ -16,9 +16,9 @@ const teamSchema = new mongoose.Schema({
 });
 
 const recordSchema = new mongoose.Schema({
-    year : Number
-    wins : Number
-    loss : Number
+    year: Number,
+    wins: Number,
+    loss: Number
 });
 
 const teamRecordSchema = new mongoose.Schema({
