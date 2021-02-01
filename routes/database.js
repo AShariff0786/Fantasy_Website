@@ -116,6 +116,17 @@ router.post('/', async(req, res) => {
         } else {
             renderMessage(res, true, `Success: All Team Games have been added to the database for the date of ${query}.`, "success");
         }
+    } else if(option == "updateRecord") {
+        const result = await updateRecord(query);
+        if (result == "error1") {
+            renderMessage(res, true, "Invalid query input for a season e.g. 2020", "error");
+        } else if (result == "error2") {
+            renderMessage(res, true, `The database contains the games for the date of ${query}.`, "error");
+        } else if (result == "error3") {
+            renderMessage(res, true, "Something went wrong, please check the console logs!", "error");
+        } else {
+            renderMessage(res, true, `Success: All Standings have been added/updated to the database for the ${query} season.`, "success");
+        }
     } else {
         renderMessage(res, true, "No option was selected in dropdown.", "error");
     }
@@ -712,26 +723,31 @@ async function addAllTeamGamesByDate(date) {
     }
 }
 
+//Last option in dropdown in query search box type 2020 then find update record and submit it
 async function updateRecord(season) {
     if(validateSeason(season)) {
         for(let i = 1; i <= 30; i++) {
             const filter = {"teamNumber": i, "game.year": season};
             const check = await Record.findOne(filter);
-            if(check.length != 0) {
+            if(!check) {
                 const teamGame = await TeamGame.findOne({"game.season" : season});
                 try {
-                    const record = new Record({
-                        teamNumber : i,
-                        year: season,
-                        if(teamGame.game.home_team_score > teamGame.game.visitor_team_score){
-                            win = 1;
-                            loss = 0;
-					    }else{
-                            loss = 1;
-                            win = 0;
-						}
-					});
-
+                    let record;
+                    if(teamGame.game.home_team_score > teamGame.game.visitor_team_score) {
+                        record = new Record({
+                            teamNumber : i,
+                            year: season,
+                            win: 1,
+                            loss: 0
+                        });
+                    } else {
+                        record = new Record({
+                            teamNumber : i,
+                            year: season,
+                            loss: 1,
+                            win: 0
+                        });
+                    }
                     await record.save();
                     console.log(`Saved new record for team ID ${i} for the ${season} Season.`);
                                            
@@ -739,24 +755,23 @@ async function updateRecord(season) {
                     console.error(error);
                     return "error3";
                 }
-                }else{
-                    const teamGame = await TeamGame.findOne({"game.season" : season});
-                    let update;
+            }else{
+                const teamGame = await TeamGame.findOne({"game.season" : season});
+                let update;
+                if(teamGame.game.home_team_score > teamGame.game.visitor_team_score){
                     update = {
-                        if(teamGame.game.home_team_score > teamGame.game.visitor_team_score){
-                            win = check.win + 1;
-					    }else{
-                            loss = check.loss + 1;
-						}
-					}
-				}
+                        win: check.win + 1
+                    }
+                } else {
+                    update = {
+                        win: check.win + 1
+                    }
+                }
             }
         }
     } else {
         return "error1";
     }
 }
-
-updateRecord (2019);
 
 module.exports = router;
