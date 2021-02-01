@@ -6,6 +6,7 @@ const SeasonAvg = require('../models/seasonavgs');
 const SeasonStats = require('../models/seasonstats');
 const SeasonStatsTotal = require('../models/seasonstatstotal');
 const TeamGame = require('../models/teamgames');
+const TeamRecord = require('../models/records');
 const axios = require('axios');
 const router = express.Router();
 require('dotenv').config();
@@ -656,6 +657,8 @@ async function addAllTeamGamesBySeason(season) {
                             const teamgame = new TeamGame({
                                 teamNumber: i,
                                 game: element
+
+                                console.log(element);
                             });
                             await teamgame.save();
                             console.log(`Saved a game for team ID ${i} for the ${season} Season.`);
@@ -695,6 +698,9 @@ async function addAllTeamGamesByDate(date) {
                             });
                             await teamgame.save();
                             console.log(`Saved a game for team ID ${i} for the date of ${date}.`);
+
+                             
+
                         }
                     }
                 } catch (error) {

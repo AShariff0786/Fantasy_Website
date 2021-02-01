@@ -6,6 +6,7 @@ const SeasonAvg = require('../models/seasonavgs');
 const SeasonStats = require('../models/seasonstats');
 const SeasonStatsTotal = require('../models/seasonstatstotal');
 const TeamGame = require('../models/teamgames');
+const Record = require('../models/records');
 const axios = require('axios');
 const router = express.Router();
 require('dotenv').config();
@@ -118,9 +119,7 @@ router.get('/standings', async (req, res, next) => {
     const teamgames = await TeamGame.find({"game.season": 2019});
 
     for(let i=1; i<+30; i++){
-        tempTeam = await teamgames.find({"teamNumber": i });
-        const test = tempTeam;
-        console.log(test);
+        
 
 	}
 
