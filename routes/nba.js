@@ -122,14 +122,8 @@ router.get('/teams', async (req, res, next) => {
 });
 
 router.get('/standings', async (req, res, next) => {
-    const teamgames = await TeamGame.find({"game.season": 2019});
-
-    for(let i=1; i<+30; i++){
-        
-
-	}
-
-    //res.render('standings.ejs', {teams: test});
+    const records = await Record.find({"record.year": 2016});
+    res.render('standings.ejs', {teams: records});
 
 });
 

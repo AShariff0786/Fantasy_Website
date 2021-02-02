@@ -795,6 +795,11 @@ async function updateRecordsBySeason(season) {
                     let homeTeamCheck = false;
                     if(element.teamNumber == element.game.home_team.id) homeTeamCheck = true;
                     const lastUpdatedDate = element.game.date;
+
+                    const Url = "https://www.balldontlie.io/api/v1/teams";
+                    const tempTeam = await axios.get(Url + '/' + element.teamNumber);
+                    const teamInfo = tempTeam.data;
+
                     //If there isn't a record already here then create it
                     if(!check) {
                         let record;
@@ -808,7 +813,8 @@ async function updateRecordsBySeason(season) {
                                         wins: 1,
                                         loss: 0
                                     },
-                                    lastUpdatedDate: lastUpdatedDate
+                                    lastUpdatedDate: lastUpdatedDate,
+                                    game: teamInfo
                                 });
                             } else {
                                 record = new TeamRecord({
@@ -818,7 +824,8 @@ async function updateRecordsBySeason(season) {
                                         wins: 0,
                                         loss: 1
                                     },
-                                    lastUpdatedDate: lastUpdatedDate
+                                    lastUpdatedDate: lastUpdatedDate,
+                                    game: teamInfo
                                 });
                             }
                         //This means that the current team is the visitor team then reverse check
@@ -831,7 +838,8 @@ async function updateRecordsBySeason(season) {
                                         wins: 1,
                                         loss: 0
                                     },
-                                    lastUpdatedDate: lastUpdatedDate
+                                    lastUpdatedDate: lastUpdatedDate,
+                                    game: teamInfo
                                 });
                             } else {
                                 record = new TeamRecord({
@@ -841,7 +849,8 @@ async function updateRecordsBySeason(season) {
                                         wins: 0,
                                         loss: 1
                                     },
-                                    lastUpdatedDate: lastUpdatedDate
+                                    lastUpdatedDate: lastUpdatedDate,
+                                    game: teamInfo
                                 });
                             }
                         }
