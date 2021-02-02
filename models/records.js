@@ -26,7 +26,8 @@ const teamRecordSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    record: recordSchema
+    record: recordSchema,
+    lastUpdatedDate: String
 });
 
 module.exports = mongoose.model('TeamRecord', teamRecordSchema);

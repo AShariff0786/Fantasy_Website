@@ -89,6 +89,12 @@ router.get('/players', async (req, res, next) => {
     res.render('players.ejs', {players: playersData});
 });
 
+router.post('/players', async (req, res, next) => {
+    const id = req.body.playerID;
+    const playerInfo = await Player.findOne({ playerNumber: id });
+    res.render('../views/templates/_player.ejs', {playerInfo: playerInfo});
+});
+
 router.get('/schedule', async (req, res, next) => {
     var date = getDate();
     gamesURL = API_URL + `games?dates[]=${date}`;

@@ -17,24 +17,26 @@
             </div>
         </div>
         <div class="container-fluid p-3">
-            <h1 class="text-center">
+            <h1 id='player-info-header' class="text-center">
                 Player Stats: 
             </h1>
             <div style="display:none" class="playerTable">
                 <table id="nbaPlayers" class="table table-hover">
                     <thead>
-                      <tr>
-                        <th scope="col">Player</th>
-                        <th scope="col">Team</th>
-                        <th scope="col">Position</th>
-                        <th scope="col">Height</th>
-                        <th scope="col">Weight</th>
-                      </tr>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Player</th>
+                            <th scope="col">Team</th>
+                            <th scope="col">Position</th>
+                            <th scope="col">Height</th>
+                            <th scope="col">Weight</th>
+                        </tr>
                     </thead>
                     <tbody>
                         <% players.forEach(player => { %>
                             <tr>
-                                <th scope="row"><%= player.first_name %> <%= player.last_name %></th>
+                                <th scope="row"><%= player.playerNumber %></th>
+                                <td><%= player.first_name %> <%= player.last_name %></td>
                                 <td><%= player.teamAbbreviation %></td>
                                 <td><%= player.position %></td>
                                 <td><%= player.height_feet %>-<%= player.height_inches %></td>
@@ -45,6 +47,7 @@
                   </table>
             </div>
         </div>
+        <div id="player-info" class="container-fluid"></div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-pQQkAEnwaBkjpqZ8RU1fF1AKtTcHJwFl3pblpTlHXybJjHpMYo79HY3hIi4NKxyj" crossorigin="anonymous"></script>
@@ -53,12 +56,30 @@
         <script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap5.min.js"></script>
         <script>
             $(document).ready(function () {
-                $('#nbaPlayers').DataTable({
-                    "order": [[3, 'desc' ]],
+                const table = $('#nbaPlayers').DataTable({
+                    "order": [[0, 'asc' ]],
                     "initComplete": function(settings, json) {
                         $('.playerTable').show();
                     }
                 });
+
+                $('.dataTable').on('click', 'tbody tr', function() {
+                    const id = table.row(this).data()[0];
+                    const data = { playerID: id };
+                    
+                    $.ajax({
+                        url: '/nba/players',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(data),
+                        success: function(data) {
+                            $('.playerTable').hide();
+                            $('#player-info-header').hide();
+                            $('#player-info').html(data);
+                        }
+                    });
+                });
+
             });
         </script>
     </body>
