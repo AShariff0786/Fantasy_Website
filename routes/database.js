@@ -6,7 +6,7 @@ const SeasonAvg = require('../models/seasonavgs');
 const SeasonStats = require('../models/seasonstats');
 const SeasonStatsTotal = require('../models/seasonstatstotal');
 const TeamGame = require('../models/teamgames');
-const Record = require('../models/records');
+const TeamRecord = require('../models/records');
 const axios = require('axios');
 const router = express.Router();
 require('dotenv').config();
@@ -116,16 +116,29 @@ router.post('/', async(req, res) => {
         } else {
             renderMessage(res, true, `Success: All Team Games have been added to the database for the date of ${query}.`, "success");
         }
-    } else if(option == "updateRecord") {
-        const result = await updateRecord(query);
+    } else if(option == "updateRecordsBySeason") {
+        const result = await updateRecordsBySeason(query);
         if (result == "error1") {
             renderMessage(res, true, "Invalid query input for a season e.g. 2020", "error");
         } else if (result == "error2") {
-            renderMessage(res, true, `The database contains the games for the date of ${query}.`, "error");
+            renderMessage(res, true, `The database contains the Team Records for the ${query} season, try Update Records By Date.`, "error");
         } else if (result == "error3") {
             renderMessage(res, true, "Something went wrong, please check the console logs!", "error");
         } else {
             renderMessage(res, true, `Success: All Standings have been added/updated to the database for the ${query} season.`, "success");
+        }
+    } else if(option == "updateRecordsByDate") {
+        const result = await updateRecordsByDate(query);
+        if (result == "error1") {
+            renderMessage(res, true, "Invalid query input for a date e.g. 2021-01-01 must follow format YYYY-MM-DD", "error");
+        } else if (result == "error2") {
+            renderMessage(res, true, `The database contains the Team Records that were last updated on the date of ${query}.`, "error");
+        } else if (result == "error3") {
+            renderMessage(res, true, "It appears there are no Team Games with this date in database to update records, please add them!", "error");
+        } else if (result == "error4") {
+            renderMessage(res, true, "Something went wrong, please check the console logs!", "error");
+        } else {
+            renderMessage(res, true, `Success: All Standings have been added/updated to the database for the date of ${query}.`, "success");
         }
     } else {
         renderMessage(res, true, "No option was selected in dropdown.", "error");
@@ -691,7 +704,7 @@ async function addAllTeamGamesByDate(date) {
         const checkDate = new Date(date).toISOString();
         const check = await TeamGame.find({ "game.date": checkDate });
         if(check.length == 0) {
-            const teamGamesUrl = API_URL + `games?dates[]=${date}&team_ids[]=1`;
+            const teamGamesUrl = API_URL + `games?dates[]=${date}&team_ids[]=`;
             for(let i = 1; i <= 30; i++) {
                 await new Promise(resolve => setTimeout(resolve, 5000));
                 const tempUrl = teamGamesUrl + String(i) + '&per_page=100';
@@ -723,51 +736,216 @@ async function addAllTeamGamesByDate(date) {
     }
 }
 
-//Last option in dropdown in query search box type 2020 then find update record and submit it
-async function updateRecord(season) {
-    if(validateSeason(season)) {
-        for(let i = 1; i <= 30; i++) {
-            const filter = {"teamNumber": i, "game.year": season};
-            const check = await Record.findOne(filter);
-            if(!check) {
-                const teamGame = await TeamGame.findOne({"game.season" : season});
+async function updateTeamGamesByDate(date) {
+    if(validateDate(date)) {
+        const checkDate = new Date(date).toISOString();
+        const check = await TeamGame.find({ "game.date": checkDate });
+        if(check.length != 0) {
+            const teamGamesUrl = API_URL + `games?dates[]=${date}&team_ids[]=`;
+            for(let i = 1; i <= 30; i++) {
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                const tempUrl = teamGamesUrl + String(i) + '&per_page=100';
                 try {
-                    let record;
-                    if(teamGame.game.home_team_score > teamGame.game.visitor_team_score) {
-                        record = new Record({
-                            teamNumber : i,
-                            year: season,
-                            win: 1,
-                            loss: 0
-                        });
+                    const result = await axios.get(tempUrl);
+                    if(result.data.data.length == 0) {
+                        continue;
                     } else {
-                        record = new Record({
-                            teamNumber : i,
-                            year: season,
-                            loss: 1,
-                            win: 0
-                        });
+                        for(const element of result.data.data) {
+                            const filter = {teamNumber: i, "game.date": checkDate };
+                            const update = {
+                                game: element
+                            };
+                            await TeamRecord.findOneAndUpdate(filter, update);
+                            console.log(`Updating Team Game for Team ID ${i} for the date of ${checkDate}.`);
+                        }
                     }
-                    await record.save();
-                    console.log(`Saved new record for team ID ${i} for the ${season} Season.`);
-                                           
                 } catch (error) {
                     console.error(error);
                     return "error3";
                 }
-            }else{
-                const teamGame = await TeamGame.findOne({"game.season" : season});
-                let update;
-                if(teamGame.game.home_team_score > teamGame.game.visitor_team_score){
-                    update = {
-                        win: check.win + 1
+            }
+        } else {
+            return "error2";
+        }
+    } else {
+        return "error1";
+    }
+}
+
+//Fixed this up for you and left comments to help understand a little bit better how the database works - T.R
+async function updateRecordsBySeason(season) {
+    //First validate the season to make sure there is no harmful query input
+    if(validateSeason(season)) {
+        const recordCheck = await TeamRecord.findOne({'record.year': season});
+        if(!recordCheck) {
+            //Find all Team Games present within the collection where the season = to the given season parameter
+            const teamGames = await TeamGame.find( {"game.season": season} ).sort({"game.date": 1});
+            //Loop through each model
+            for(const element of teamGames) {
+                //Anyone of the database reads or writes can throw an error so surround with try catch.
+                try {
+                    //If any of the games haven't been played yet don't count them.
+                    if(element.game.period == 0) continue;
+                    //Get current team games team id.
+                    const teamID = element.teamNumber;
+                    //Filter to search the Team Record database to check if one exists with certain constaints
+                    const filter = {"teamNumber": teamID, "record.year": season};
+                    const check = await TeamRecord.findOne(filter);
+                    //Find out whether the current team is either the home team or vistor team
+                    let homeTeamCheck = false;
+                    if(element.teamNumber == element.game.home_team.id) homeTeamCheck = true;
+                    const lastUpdatedDate = element.game.date;
+                    //If there isn't a record already here then create it
+                    if(!check) {
+                        let record;
+                        //If the team is the home team check if their score is higher than visitor
+                        if(homeTeamCheck) {
+                            if(element.game.home_team_score > element.game.visitor_team_score) {
+                                record = new TeamRecord({
+                                    teamNumber : teamID,
+                                    record : {
+                                        year: season,
+                                        wins: 1,
+                                        loss: 0
+                                    },
+                                    lastUpdatedDate: lastUpdatedDate
+                                });
+                            } else {
+                                record = new TeamRecord({
+                                    teamNumber : teamID,
+                                    record: {
+                                        year: season,
+                                        wins: 0,
+                                        loss: 1
+                                    },
+                                    lastUpdatedDate: lastUpdatedDate
+                                });
+                            }
+                        //This means that the current team is the visitor team then reverse check
+                        } else {
+                            if(element.game.visitor_team_score > element.game.home_team_score) {
+                                record = new TeamRecord({
+                                    teamNumber : teamID,
+                                    record : {
+                                        year: season,
+                                        wins: 1,
+                                        loss: 0
+                                    },
+                                    lastUpdatedDate: lastUpdatedDate
+                                });
+                            } else {
+                                record = new TeamRecord({
+                                    teamNumber : teamID,
+                                    record: {
+                                        year: season,
+                                        wins: 0,
+                                        loss: 1
+                                    },
+                                    lastUpdatedDate: lastUpdatedDate
+                                });
+                            }
+                        }
+                        await record.save();
+                        console.log(`Saved new record for team ID ${teamID} for the ${season} Season.`);           
+                    } else {
+                        //Record exists so time to update
+                        let update;
+                        //Do the same check for if the current team is the home team
+                        if(homeTeamCheck) {
+                            if(element.game.home_team_score > element.game.visitor_team_score){
+                                update = {
+                                    "record.wins": check.record.wins + 1,
+                                    lastUpdatedDate: lastUpdatedDate
+                                }
+                            } else {
+                                update = {
+                                    "record.loss": check.record.loss + 1,
+                                    lastUpdatedDate: lastUpdatedDate
+                                }
+                            }
+                        } else {
+                            if(element.game.visitor_team_score > element.game.home_team_score){
+                                update = {
+                                    "record.wins": check.record.wins + 1,
+                                    lastUpdatedDate: lastUpdatedDate
+                                }
+                            } else {
+                                update = {
+                                    "record.loss": check.record.loss + 1,
+                                    lastUpdatedDate: lastUpdatedDate
+                                }
+                            }
+                        }
+                        //Find the same record based on the given filter above and update the fields
+                        await TeamRecord.findOneAndUpdate(filter, update);
+                        console.log(`Updating Team Record for Team ID ${check.teamNumber} for the ${season} Season.`);
                     }
-                } else {
-                    update = {
-                        win: check.win + 1
-                    }
+                } catch (error) {
+                    console.error(error);
+                    return "error3";
                 }
             }
+        } else {
+            return "error2";
+        }
+    } else {
+        return "error1";
+    }
+}
+
+async function updateRecordsByDate(date){
+    await updateTeamGamesByDate(date);
+    if(validateSeason(date)) {
+        const checkDate = new Date(date).toISOString();
+        const recordCheck = await TeamRecord.findOne({'lastUpdatedDate': checkDate});
+        if(!recordCheck) {
+            const teamGamesCheck = await TeamGame.find( {"game.date": checkDate} );
+            if(teamGamesCheck.length != 0) {
+                for(const element of teamGamesCheck) {
+                    const teamID = element.teamNumber;
+                    let homeTeamCheck = false;
+                    if(teamID == element.game.home_team.id) homeTeamCheck = true;
+                    const lastUpdatedDate = element.game.date;
+                    let update;
+                    if(homeTeamCheck) {
+                        if(element.game.home_team_score > element.game.visitor_team_score){
+                            update = {
+                                "record.wins": check.record.wins + 1,
+                                lastUpdatedDate: lastUpdatedDate
+                            }
+                        } else {
+                            update = {
+                                "record.loss": check.record.loss + 1,
+                                lastUpdatedDate: lastUpdatedDate
+                            }
+                        }
+                    } else {
+                        if(element.game.visitor_team_score > element.game.home_team_score){
+                            update = {
+                                "record.wins": check.record.wins + 1,
+                                lastUpdatedDate: lastUpdatedDate
+                            }
+                        } else {
+                            update = {
+                                "record.loss": check.record.loss + 1,
+                                lastUpdatedDate: lastUpdatedDate
+                            }
+                        }
+                    }
+                    try {
+                        const filter = {"teamNumber": teamID, "lastUpdatedDate": lastUpdatedDate};
+                        await TeamRecord.findOneAndUpdate(filter, update);
+                        console.log(`Updating Team Record for Team ID ${teamID} for the date of ${date}.`);
+                    } catch (error) {
+                        console.error(error);
+                        return "error4";
+                    }
+                }
+            } else {
+                return "error3";
+            } 
+        } else {
+            return "error2";
         }
     } else {
         return "error1";

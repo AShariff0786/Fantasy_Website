@@ -6,7 +6,7 @@ const requiredString = {
 };
 
 const teamSchema = new mongoose.Schema({
-    teamID: Number,
+    id: Number,
     abbreviation: String,
     city: String,
     conference: String,
