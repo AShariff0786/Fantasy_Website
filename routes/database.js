@@ -14,7 +14,7 @@ require('dotenv').config();
 const API_URL = 'https://www.balldontlie.io/api/v1/';
 
 router.get('/', async(req, res) => {
-    renderMessage(res, true, "Please remember to add the Season Stats By Date for yesterday's date in the format of YYYY-MM-DD and also update the Season Average for current season 2020. TODO SHOW COLLECTIONS" , "success");
+    renderMessage(res, true, "Please remember to add the Season Stats By Date for yesterday's date in the format of YYYY-MM-DD and also update the Season Average for current season 2020. Also update the records for the 2020 season by date." , "success");
 });
 
 router.post('/', async(req, res) => {
@@ -800,10 +800,7 @@ async function updateRecordsBySeason(season) {
                     if(element.teamNumber == element.game.home_team.id) homeTeamCheck = true;
                     const lastUpdatedDate = element.game.date;
 
-                    const Url = "https://www.balldontlie.io/api/v1/teams";
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                    const tempTeam = await axios.get(Url + '/' + element.teamNumber);
-                    const teamInfo = tempTeam.data;
+                    const teamInfo = await Team.findOne({ teamNumber: teamID});
 
                     //If there isn't a record already here then create it
                     if(!check) {
@@ -908,7 +905,7 @@ async function updateRecordsBySeason(season) {
 }
 
 async function updateRecordsByDate(date){
-    //await updateTeamGamesByDate(date);
+    await updateTeamGamesByDate(date);
     if(validateDate(date)) {
         const checkDate = new Date(date).toISOString();
         const year = checkDate.split('-')[0] - 1;

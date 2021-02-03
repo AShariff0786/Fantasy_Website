@@ -1,12 +1,12 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const fs = require('fs');
 const Team = require('../models/teams');
 const Player = require('../models/players');
 const SeasonAvg = require('../models/seasonavgs');
 const SeasonStats = require('../models/seasonstats');
 const SeasonStatsTotal = require('../models/seasonstatstotal');
 const TeamGame = require('../models/teamgames');
-const Record = require('../models/records');
+const TeamRecord = require('../models/records');
 const axios = require('axios');
 const router = express.Router();
 require('dotenv').config();
@@ -38,6 +38,29 @@ async function joinSeasonAverageAndPlayers() {
             as: 'playerdetails'
         }
     }]);
+    return result;
+}
+
+async function getMorePlayerInformation(id) {
+    const result = await Player.aggregate([
+        {
+            $match: { playerNumber: id }
+        }, {
+            $lookup: {
+                from: 'teams',
+                localField: 'teamNumber',
+                foreignField: 'teamNumber',
+                as: 'teaminfo'
+            }
+        }, {
+            $lookup: {
+                from: 'seasonavgs',
+                localField: 'playerNumber',
+                foreignField: 'player_id',
+                as: 'seasonavgs'
+            }
+        }
+    ]);
     return result;
 }
 
@@ -86,13 +109,27 @@ router.get('/players', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
+    for(const player of playersData) {
+        player.full_name = `${player.first_name} ${player.last_name}`;
+        let temp = player.full_name.toLowerCase().replace(/ /g, "-");
+        temp = temp.replace(/'/g, "");
+        temp = temp.replace(/\./g , "");
+        let image_name;
+        try {
+            await fs.promises.access('./public/images/headshots/260x190/' + temp + '.png');
+            image_name = temp + '.png';
+        } catch (error) {
+            image_name = 'logoman.png';
+        }
+        player.image_name = image_name;
+    }
     res.render('players.ejs', {players: playersData});
 });
 
 router.post('/players', async (req, res, next) => {
     const id = req.body.playerID;
-    const playerInfo = await Player.findOne({ playerNumber: id });
-    res.render('../views/templates/_player.ejs', {playerInfo: playerInfo});
+    const moreInfo = await getMorePlayerInformation(Number(id));
+    res.render('../views/templates/_player.ejs', {playerInfo: moreInfo});
 });
 
 router.get('/schedule', async (req, res, next) => {
@@ -122,7 +159,7 @@ router.get('/teams', async (req, res, next) => {
 });
 
 router.get('/standings', async (req, res, next) => {
-    const records = await Record.find({"record.year": 2016});
+    const records = await TeamRecord.find({"record.year": 2020});
     res.render('standings.ejs', {teams: records});
 
 });

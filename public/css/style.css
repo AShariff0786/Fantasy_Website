@@ -131,3 +131,12 @@ div.btn-group button:hover {
     font-weight: 700;
     border-radius: 10px;
 }
+
+.table-headshots {
+    width: 65px;
+    height: 47px;
+}
+
+#player-info {
+    background-color: red;
+}
