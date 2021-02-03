@@ -753,9 +753,13 @@ async function updateTeamGamesByDate(date) {
                         for(const element of result.data.data) {
                             const filter = {teamNumber: i, "game.date": checkDate };
                             const update = {
-                                game: element
+                                'game.home_team_score': element.home_team_score,
+                                'game.period': element.period,
+                                'game.home_team_score': element.home_team_score,
+                                'game.status': element.status,
+                                'game.visitor_team_score': element.visitor_team_score,
                             };
-                            await TeamRecord.findOneAndUpdate(filter, update);
+                            await TeamGame.findOneAndUpdate(filter, update);
                             console.log(`Updating Team Game for Team ID ${i} for the date of ${checkDate}.`);
                         }
                     }
@@ -797,6 +801,7 @@ async function updateRecordsBySeason(season) {
                     const lastUpdatedDate = element.game.date;
 
                     const Url = "https://www.balldontlie.io/api/v1/teams";
+                    await new Promise(resolve => setTimeout(resolve, 5000));
                     const tempTeam = await axios.get(Url + '/' + element.teamNumber);
                     const teamInfo = tempTeam.data;
 
@@ -903,9 +908,10 @@ async function updateRecordsBySeason(season) {
 }
 
 async function updateRecordsByDate(date){
-    await updateTeamGamesByDate(date);
-    if(validateSeason(date)) {
+    //await updateTeamGamesByDate(date);
+    if(validateDate(date)) {
         const checkDate = new Date(date).toISOString();
+        const year = checkDate.split('-')[0] - 1;
         const recordCheck = await TeamRecord.findOne({'lastUpdatedDate': checkDate});
         if(!recordCheck) {
             const teamGamesCheck = await TeamGame.find( {"game.date": checkDate} );
@@ -915,34 +921,35 @@ async function updateRecordsByDate(date){
                     let homeTeamCheck = false;
                     if(teamID == element.game.home_team.id) homeTeamCheck = true;
                     const lastUpdatedDate = element.game.date;
+                    const currentRecord = await TeamRecord.findOne({teamNumber: teamID, "record.year": year});
                     let update;
                     if(homeTeamCheck) {
                         if(element.game.home_team_score > element.game.visitor_team_score){
                             update = {
-                                "record.wins": check.record.wins + 1,
+                                "record.wins": currentRecord.record.wins + 1,
                                 lastUpdatedDate: lastUpdatedDate
                             }
                         } else {
                             update = {
-                                "record.loss": check.record.loss + 1,
+                                "record.loss": currentRecord.record.loss + 1,
                                 lastUpdatedDate: lastUpdatedDate
                             }
                         }
                     } else {
                         if(element.game.visitor_team_score > element.game.home_team_score){
                             update = {
-                                "record.wins": check.record.wins + 1,
+                                "record.wins": currentRecord.record.wins + 1,
                                 lastUpdatedDate: lastUpdatedDate
                             }
                         } else {
                             update = {
-                                "record.loss": check.record.loss + 1,
+                                "record.loss": currentRecord.record.loss + 1,
                                 lastUpdatedDate: lastUpdatedDate
                             }
                         }
                     }
                     try {
-                        const filter = {"teamNumber": teamID, "lastUpdatedDate": lastUpdatedDate};
+                        const filter = {"teamNumber": teamID, "record.year": year};
                         await TeamRecord.findOneAndUpdate(filter, update);
                         console.log(`Updating Team Record for Team ID ${teamID} for the date of ${date}.`);
                     } catch (error) {
