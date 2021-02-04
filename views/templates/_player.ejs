@@ -1,4 +1,18 @@
 <div id="player-info">
-    <p><%= playerInfo[0].first_name %> <%= playerInfo[0].last_name %></p>
-    <p><%= playerInfo[0].teaminfo[0].full_name %> | <%= playerInfo[0].position %></p>
+    <div class="overlay" style="background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('<%= '/images/logos/' + playerInfo[0].teaminfo[0].name + '.svg' %>');">
+        <div class="row pr-5">
+            <div id= "player-headshot-div" class="col-sm-7 col-md-7 col-lg-7 col-xl-7">
+                <div id="headshot-div" class="d-block m-auto">
+                    <img id="player-headshot" src=<%= "/images/headshots/1040x760/" + playerInfo[0].image_name %>>
+                </div>
+            </div>
+            <div id="player-details" class="col-sm-5 col-md-5 col-lg-5 col-xl-5">
+                <div id="content">
+                    <h1><%= playerInfo[0].first_name %> <%= playerInfo[0].last_name %></h1>
+                    <p><%= playerInfo[0].teaminfo[0].full_name %> | <%= playerInfo[0].position %></p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+

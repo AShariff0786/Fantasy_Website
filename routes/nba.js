@@ -129,6 +129,20 @@ router.get('/players', async (req, res, next) => {
 router.post('/players', async (req, res, next) => {
     const id = req.body.playerID;
     const moreInfo = await getMorePlayerInformation(Number(id));
+    for(const player of moreInfo) {
+        player.full_name = `${player.first_name} ${player.last_name}`;
+        let temp = player.full_name.toLowerCase().replace(/ /g, "-");
+        temp = temp.replace(/'/g, "");
+        temp = temp.replace(/\./g , "");
+        let image_name;
+        try {
+            await fs.promises.access('./public/images/headshots/1040x760/' + temp + '.png');
+            image_name = temp + '.png';
+        } catch (error) {
+            image_name = 'logoman.png';
+        }
+        player.image_name = image_name;
+    }
     res.render('../views/templates/_player.ejs', {playerInfo: moreInfo});
 });
 
