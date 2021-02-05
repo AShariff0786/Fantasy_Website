@@ -59,9 +59,172 @@ async function getMorePlayerInformation(id) {
                 foreignField: 'player_id',
                 as: 'seasonavgs'
             }
+        }, {
+            $lookup: {
+                from: 'seasonstats',
+                localField: 'playerNumber',
+                foreignField: 'player.id',
+                as: 'seasonstats'
+            }
         }
     ]);
     return result;
+}
+
+function getTeamRGBColors(team) {
+    const colorTemplate = {
+        'ATL': {
+            r: 255,
+            g: 68,
+            b: 52
+        },
+        'BOS': {
+            r: 0,
+            g: 122,
+            b: 51
+        },
+        'BKN': {
+            r: 0,
+            g: 0,
+            b: 0
+        },
+        'CHA': {
+            r: 29,
+            g: 17,
+            b: 96
+        },
+        'CHI': {
+            r: 206,
+            g: 17,
+            b: 65
+        },
+        'CLE': {
+            r: 134,
+            g: 0,
+            b: 56
+        },
+        'DAL': {
+            r: 0,
+            g: 83,
+            b: 188
+        },
+        'DEN': {
+            r: 13,
+            g: 34,
+            b: 64
+        },
+        'DET': {
+            r: 29,
+            g: 66,
+            b: 138
+        },
+        'GSW': {
+            r: 0,
+            g: 107,
+            b: 182
+        },
+        'HOU': {
+            r: 206,
+            g: 17,
+            b: 65
+        },
+        'IND': {
+            r: 0,
+            g: 45,
+            b: 98
+        },
+        'LAC': {
+            r: 29,
+            g: 66,
+            b: 148
+        },
+        'LAL': {
+            r: 85,
+            g: 37,
+            b: 130
+        },
+        'MEM': {
+            r: 93,
+            g: 118,
+            b: 169
+        },
+        'MIA': {
+            r: 152,
+            g: 0,
+            b: 46
+        },
+        'MIL': {
+            r: 0,
+            g: 71,
+            b: 27
+        },
+        'MIN': {
+            r: 12,
+            g: 35,
+            b: 64
+        },
+        'NOP': {
+            r: 0,
+            g: 22,
+            b: 65
+        },
+        'NYK': {
+            r: 0,
+            g: 107,
+            b: 182
+        },
+        'OKC': {
+            r: 0,
+            g: 125,
+            b: 195
+        },
+        'ORL': {
+            r: 0,
+            g: 125,
+            b: 197
+        },
+        'PHI': {
+            r: 0,
+            g: 107,
+            b: 182
+        },
+        'PHX': {
+            r: 29,
+            g: 17,
+            b: 96
+        },
+        'POR': {
+            r: 224,
+            g: 58,
+            b: 62
+        },
+        'SAC': {
+            r: 91,
+            g: 43,
+            b: 130
+        },
+        'SAS': {
+            r: 196,
+            g: 206,
+            b: 211
+        },
+        'TOR': {
+            r: 206,
+            g: 17,
+            b: 65
+        },
+        'UTA': {
+            r: 0,
+            g: 43,
+            b: 92
+        },
+        'WAS': {
+            r: 0,
+            g: 43,
+            b: 92
+        }
+    }
+    return colorTemplate[team];
 }
 
 router.get('/', async(req, res) => {
@@ -129,6 +292,7 @@ router.get('/players', async (req, res, next) => {
 router.post('/players', async (req, res, next) => {
     const id = req.body.playerID;
     const moreInfo = await getMorePlayerInformation(Number(id));
+    const colors = getTeamRGBColors(moreInfo[0].teaminfo[0].abbreviation);
     for(const player of moreInfo) {
         player.full_name = `${player.first_name} ${player.last_name}`;
         let temp = player.full_name.toLowerCase().replace(/ /g, "-");
@@ -142,8 +306,15 @@ router.post('/players', async (req, res, next) => {
             image_name = 'logoman.png';
         }
         player.image_name = image_name;
+        player.teamColors = colors;
     }
-    res.render('../views/templates/_player.ejs', {playerInfo: moreInfo});
+    const last5Games = moreInfo[0].seasonstats.sort(function(a, b) {
+        return new Date(b.game.date) - new Date(a.game.date);
+    }).slice(0, 5);
+    res.render('../views/templates/_player.ejs', {
+        playerInfo: moreInfo,
+        last5Games: last5Games
+    });
 });
 
 router.get('/schedule', async (req, res, next) => {

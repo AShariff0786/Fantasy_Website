@@ -91,6 +91,15 @@ div.btn-group button:hover {
     font-size: small;
 }
 
+#nbaPlayer,
+#nbaPlayer_length > label > select,
+#nbaPlayer_filter > label > input,
+#nbaPlayer_paginate > ul > li:nth-child(n) > a {
+    background-color: #131313;
+    color: #ffffff;
+    font-size: small;
+}
+
 #seasonAvg,
 #seasonAvg_length > label > select,
 #seasonAvg_filter > label > input,
@@ -101,7 +110,8 @@ div.btn-group button:hover {
 }
 
 #nbaPlayers_paginate > ul > li:nth-child(n) > a:hover,
-#seasonAvg > ul > li:nth-child(n) > a:hover {
+#seasonAvg > ul > li:nth-child(n) > a:hover
+#nbaPlayer > ul > li:nth-child(n) > a:hover {
     background-color: #0071BC;
 }
 
@@ -165,6 +175,7 @@ div.btn-group button:hover {
 .overlay {
     width: 100%;
     height: 40vh;
+    border-radius: 10px;
     position: relative;
     background-repeat:  no-repeat;
     background-attachment: fixed;

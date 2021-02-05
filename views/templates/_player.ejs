@@ -1,5 +1,5 @@
 <div id="player-info">
-    <div class="overlay" style="background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('<%= '/images/logos/' + playerInfo[0].teaminfo[0].name + '.svg' %>');">
+    <div class="overlay" style="background-image: linear-gradient(rgba(<%= playerInfo[0].teamColors.r %>, <%= playerInfo[0].teamColors.g %>, <%= playerInfo[0].teamColors.b %>, 0.8), rgba(<%= playerInfo[0].teamColors.r %>, <%= playerInfo[0].teamColors.g %>, <%= playerInfo[0].teamColors.b %>, 0.8)), url('<%= '/images/logos/' + playerInfo[0].teaminfo[0].name + '.svg' %>');">
         <div class="row pr-5">
             <div id= "player-headshot-div" class="col-sm-7 col-md-7 col-lg-7 col-xl-7">
                 <div id="headshot-div" class="d-block m-auto">
@@ -14,5 +14,119 @@
             </div>
         </div>
     </div>
+</div>
+
+<div class="seasonAvgTable mt-5">
+    <h1 class="text-center mb-3">Season Averages:</h1>
+    <table id="seasonAvg" class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Player</th>
+                <th scope="col">Season</th>
+                <th scope="col">GP</th>
+                <th scope="col">PTS</th>
+                <th scope="col">FGM</th>
+                <th scope="col">FGA</th>
+                <th scope="col">FG%</th>
+                <th scope="col">3PM</th>
+                <th scope="col">3PA</th>
+                <th scope="col">3P%</th>
+                <th scope="col">FTM</th>
+                <th scope="col">FTA</th>
+                <th scope="col">FT%</th>
+                <th scope="col">OREB</th>
+                <th scope="col">DREB</th>
+                <th scope="col">REB</th>
+                <th scope="col">AST</th>
+                <th scope="col">TOV</th>
+                <th scope="col">STL</th>
+                <th scope="col">BLK</th>
+                <th scope="col">PF</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% playerInfo[0].seasonavgs.forEach(avg => { %>
+                <tr>
+                    <th scope="row"><%= playerInfo[0].first_name %> <%=playerInfo[0].last_name %></th>
+                    <td><%= avg.season %> </td>
+                    <td><%= avg.games_played %></td>
+                    <td><%= avg.pts %></td>
+                    <td><%= avg.fgm %></td>
+                    <td><%= avg.fga %></td>
+                    <td><%= avg.fg_pct %></td>
+                    <td><%= avg.fg3m %></td>
+                    <td><%= avg.fg3a %></td>
+                    <td><%= avg.fg3_pct %></td>
+                    <td><%= avg.ftm %></td>
+                    <td><%= avg.fta %></td>
+                    <td><%= avg.ft_pct %></td>
+                    <td><%= avg.oreb %></td>
+                    <td><%= avg.dreb %></td>
+                    <td><%= avg.reb %></td>
+                    <td><%= avg.ast %></td>
+                    <td><%= avg.turnover %></td>
+                    <td><%= avg.stl %></td>
+                    <td><%= avg.blk %></td>
+                    <td><%= avg.pf %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+      </table>
+</div>
+
+<div class="playerGamesTable mt-5">
+    <h1 class="text-center mb-3">Last 5 Games:</h1>
+    <table id="nbaPlayer" class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">GAME DATE</th>
+                <th scope="col">MIN</th>
+                <th scope="col">PTS</th>
+                <th scope="col">FGM</th>
+                <th scope="col">FGA</th>
+                <th scope="col">FG%</th>
+                <th scope="col">3PM</th>
+                <th scope="col">3PA</th>
+                <th scope="col">3P%</th>
+                <th scope="col">FTM</th>
+                <th scope="col">FTA</th>
+                <th scope="col">FT%</th>
+                <th scope="col">OREB</th>
+                <th scope="col">DREB</th>
+                <th scope="col">REB</th>
+                <th scope="col">AST</th>
+                <th scope="col">TOV</th>
+                <th scope="col">STL</th>
+                <th scope="col">BLK</th>
+                <th scope="col">PF</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% last5Games.forEach(stat => { %>
+                <tr>
+                    <th scope="row"><%= stat.game.date %></th>
+                    <td><%= stat.min %></td>
+                    <td><%= stat.pts %></td>
+                    <td><%= stat.fgm %></td>
+                    <td><%= stat.fga %></td>
+                    <td><%= stat.fg_pct %></td>
+                    <td><%= stat.fg3m %></td>
+                    <td><%= stat.fg3a %></td>
+                    <td><%= stat.fg3_pct %></td>
+                    <td><%= stat.ftm %></td>
+                    <td><%= stat.fta %></td>
+                    <td><%= stat.ft_pct %></td>
+                    <td><%= stat.oreb %></td>
+                    <td><%= stat.dreb %></td>
+                    <td><%= stat.reb %></td>
+                    <td><%= stat.ast %></td>
+                    <td><%= stat.turnover %></td>
+                    <td><%= stat.stl %></td>
+                    <td><%= stat.blk %></td>
+                    <td><%= stat.pf %></td>
+                  </tr>
+            <% }) %>
+        </tbody>
+      </table>
 </div>
 
