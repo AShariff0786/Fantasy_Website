@@ -52,18 +52,23 @@ body {
     text-align: center;
 }
 
-div.btn-group {
+div.btn-group,
+#multiplierButton {
     margin: 0 auto; 
     text-align: center;
     width: inherit;
     display: inline-block;
 }
 
-div.btn-group button {
+div.btn-group button,
+#multiplierButton button,
+#multiplierModal > div > div > div.modal-body > form > div > div.col-lg-12.col-xl-12.mt-3.text-center > button {
     background-color: #131313;
 }
 
-div.btn-group button:hover {
+div.btn-group button:hover,
+#multiplierButton button:hover,
+#multiplierModal > div > div > div.modal-body > form > div > div.col-lg-12.col-xl-12.mt-3.text-center > button:hover {
     background-color: #0071BC;
 }
 
@@ -109,9 +114,19 @@ div.btn-group button:hover {
     font-size: small;
 }
 
+#fantasy,
+#fantasy_length > label > select,
+#fantasy_filter > label > input,
+#fantasy_paginate > ul > li:nth-child(n) > a {
+    background-color: #131313;
+    color: #ffffff;
+    font-size: small;
+}
+
 #nbaPlayers_paginate > ul > li:nth-child(n) > a:hover,
 #seasonAvg > ul > li:nth-child(n) > a:hover
-#nbaPlayer > ul > li:nth-child(n) > a:hover {
+#nbaPlayer > ul > li:nth-child(n) > a:hover
+#fantasy > ul > li:nth-child(n) > a:hover {
     background-color: #0071BC;
 }
 
@@ -122,6 +137,19 @@ div.btn-group button:hover {
 }
 
 #formGroupQueryInput,
+#formGroupPtsInput,
+#formGroupRebInput,
+#formGroupAstInput,
+#formGroupBlkInput,
+#formGroupStlInput,
+#formGroupFgaInput,
+#formGroupFgmInput,
+#formGroupFtaInput,
+#formGroupFtmInput,
+#formGroup3pmInput,
+#formGroupTovInput,
+#formGroupDdInput,
+#formGroupTdInput,
 .form-select {
     background-color: #131313;
     color: #ffffff;
@@ -143,8 +171,8 @@ div.btn-group button:hover {
 }
 
 .table-headshots {
-    width: 65px;
-    height: 47px;
+    width: 32px;
+    height: 23px;
 }
 
 #player-headshot-div,
@@ -180,4 +208,12 @@ div.btn-group button:hover {
     background-repeat:  no-repeat;
     background-attachment: fixed;
     background-position: center;
+}
+
+#multiplierModal > div > div > div.modal-header > button {
+    background-color: red;
+}
+
+#multiplierModal > .modal-dialog > .modal-content {
+    background-color: #131313;
 }

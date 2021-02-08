@@ -180,6 +180,36 @@ function addMinTime(min1, min2) {
     return result;
 }
 
+function doubleOrTripleOrQuadDoubleCheck(element) {
+    let checks = {
+        dd: false,
+        td: false,
+        qd: false
+    }
+    const categories = {
+        pts: element.pts,
+        reb: element.reb,
+        ast: element.ast,
+        stl: element.stl,
+        blk: element.blk
+    }
+    let counter = 0;
+    for(let index in categories ){
+        if(categories[index] > 9) counter++;
+    }
+    if(counter == 2) checks.dd = true;
+    if(counter == 3) {
+        checks.dd = true;
+        checks.td = true;
+    }
+    if(counter == 4) {
+        checks.dd = true;
+        checks.td = true;
+        checks.qd = true;
+    }
+    return checks;
+}
+
 async function addAllPlayerSeasonStatsBySeason(season) {
     if(validateSeason(season)) {
         const check = await SeasonStats.find({ "game.season": season});
@@ -204,6 +234,7 @@ async function addAllPlayerSeasonStatsBySeason(season) {
                     try {
                         const result = await axios.get(tempURL);
                         for (const element of result.data.data) {
+                            const doubles = doubleOrTripleOrQuadDoubleCheck(element); 
                             const seasonstats = new SeasonStats({
                                 ast: element.ast,
                                 blk: element.blk,
@@ -226,7 +257,10 @@ async function addAllPlayerSeasonStatsBySeason(season) {
                                 reb: element.reb,
                                 stl: element.stl,
                                 team: element.team,
-                                turnover: element.turnover
+                                turnover: element.turnover,
+                                dd: doubles.dd,
+                                td: doubles.td,
+                                qd: doubles.qd
                             });
                             await seasonstats.save();
                             console.log(`Saved Stats for Player ID ${seasonstats.player.id} for Season ${season} to database.`);
@@ -270,6 +304,7 @@ async function addAllPlayerSeasonStatsByDate(date) {
                     try {
                         const result = await axios.get(tempURL);
                         for (const element of result.data.data) {
+                            const doubles = doubleOrTripleOrQuadDoubleCheck(element);
                             const seasonstats = new SeasonStats({
                                 ast: element.ast,
                                 blk: element.blk,
@@ -292,7 +327,10 @@ async function addAllPlayerSeasonStatsByDate(date) {
                                 reb: element.reb,
                                 stl: element.stl,
                                 team: element.team,
-                                turnover: element.turnover
+                                turnover: element.turnover,
+                                dd: doubles.dd,
+                                td: doubles.td,
+                                qd: doubles.qd
                             });
                             await seasonstats.save();
                             console.log(`Saved Stats for Player ID ${seasonstats.player.id} for Date ${date} to database.`);
@@ -322,6 +360,10 @@ async function updateSeasonStatsTotalsByDate(date) {
             if (!total) {
                 continue;
             } else {
+                let totaldd = total.totaldd, totaltd = total.totaltd, totalqd = total.totalqd;
+                if(stat.dd) totaldd++;
+                if(stat.td) totaltd++;
+                if(stat.qd) totalqd++;
                 update = {
                     ast: total.ast + stat.ast,
                     blk: total.blk + stat.blk,
@@ -343,7 +385,10 @@ async function updateSeasonStatsTotalsByDate(date) {
                     reb: total.reb + stat.reb,
                     stl: total.stl + stat.stl,
                     turnover: total.turnover + stat.turnover,
-                    games_played: total.games_played + 1
+                    games_played: total.games_played + 1,
+                    totaldd: totaldd,
+                    totaltd: totaltd,
+                    totalqd: totalqd
                 }
                 await SeasonStatsTotal.findOneAndUpdate(filter, update);
                 console.log(`Adding Stats for Player ID ${total.player.id} for date of ${date} Totals to database.`);
@@ -479,6 +524,11 @@ async function addAllPlayersSeasonStatsTotalsBySeason(season) {
                     const filter = {"player.id": playerID, "game.season": season};
                     const check = await SeasonStatsTotal.findOne(filter);
                     if(!check) {
+                        let totaldd = 0, totaltd = 0, totalqd = 0;
+                        if(element.dd) totaldd++;
+                        if(element.td) totaltd++;
+                        if(element.qd) totalqd++;
+
                         const seasonstatstotal = new SeasonStatsTotal({
                             ast: element.ast,
                             blk: element.blk,
@@ -502,12 +552,20 @@ async function addAllPlayersSeasonStatsTotalsBySeason(season) {
                             stl: element.stl,
                             team: element.team,
                             turnover: element.turnover,
-                            games_played: 1
+                            games_played: 1,
+                            totaldd: totaldd,
+                            totaltd: totaltd,
+                            totalqd: totalqd
+
                         });
                         await seasonstatstotal.save();
                         console.log(`Saved Total Stats for Player ID ${seasonstatstotal.player.id} for Season ${season} to database.`);
                     } else {
                         let update;
+                        let totaldd = check.totaldd, totaltd = check.totaltd, totalqd = check.totalqd;
+                        if(element.dd) totaldd++;
+                        if(element.td) totaltd++;
+                        if(element.qd) totalqd++;
                         const date1 = new Date(element.game.date);
                         const date2 = new Date(check.game.date);
                         const minutes = addMinTime(check.min, element.min);
@@ -533,7 +591,10 @@ async function addAllPlayersSeasonStatsTotalsBySeason(season) {
                                 reb: check.reb + element.reb,
                                 stl: check.stl + element.stl,
                                 turnover: check.turnover + element.turnover,
-                                games_played: check.games_played + 1
+                                games_played: check.games_played + 1,
+                                totaldd: totaldd,
+                                totaltd: totaltd,
+                                totalqd: totalqd
                             }
                         } else {
                             update = {
@@ -556,7 +617,10 @@ async function addAllPlayersSeasonStatsTotalsBySeason(season) {
                                 reb: check.reb + element.reb,
                                 stl: check.stl + element.stl,
                                 turnover: check.turnover + element.turnover,
-                                games_played: check.games_played + 1
+                                games_played: check.games_played + 1,
+                                totaldd: totaldd,
+                                totaltd: totaltd,
+                                totalqd: totalqd
                             }
                         }
                         await SeasonStatsTotal.findOneAndUpdate(filter, update);

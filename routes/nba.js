@@ -231,6 +231,70 @@ router.get('/', async(req, res) => {
     res.render('nba.ejs');
 });
 
+router.get('/fantasy', async (req, res, next) => {
+    const multipliers = {
+        point: 1,
+        fg3m: 1,
+        fga: -1,
+        fgm: 2,
+        fta: -1,
+        ftm: 1,
+        reb: 1,
+        ast: 2,
+        stl: 4,
+        blk: 4,
+        tov: -2,
+        dd: 3,
+        td: 3
+    }
+    const seasonTotals = await SeasonStatsTotal.find({ 'game.season': 2020});
+    let fantasyLeaders = [];
+    for(let total of seasonTotals) {
+        const fpts = (total.pts * multipliers.point) + (total.fg3m * multipliers.fg3m) + 
+                     (total.fga * multipliers.fga) + (total.fgm * multipliers.fgm) + 
+                     (total.fta * multipliers.fta) + (total.ftm * multipliers.ftm) + 
+                     (total.reb * multipliers.reb) + (total.ast * multipliers.ast) + 
+                     (total.stl * multipliers.stl) + (total.blk * multipliers.blk) + 
+                     (total.turnover * multipliers.tov) + (total.totaldd * multipliers.dd) + 
+                     (total.totaltd * multipliers.td);
+        const leader = {
+            full_name: `${total.player.first_name} ${total.player.last_name}`,
+            team: total.team.abbreviation,
+            position: total.player.position,
+            pts: total.pts,
+            reb: total.reb,
+            ast: total.ast,
+            blk: total.blk,
+            stl: total.stl,
+            fga: total.fga,
+            fgm: total.fgm,
+            fta: total.fta,
+            ftm: total.ftm,
+            fg3m: total.fg3m,
+            tov: total.turnover,
+            dd: total.totaldd,
+            td: total.totaltd,
+            fpts: fpts
+        }
+        let temp = leader.full_name.toLowerCase().replace(/ /g, "-");
+        temp = temp.replace(/'/g, "");
+        temp = temp.replace(/\./g , "");
+        let image_name;
+        try {
+            await fs.promises.access('./public/images/headshots/260x190/' + temp + '.png');
+            image_name = temp + '.png';
+        } catch (error) {
+            image_name = 'logoman.png';
+        }
+        leader.image_name = image_name;
+        fantasyLeaders.push(leader);
+    }
+    res.render('fantasy.ejs', {
+        fantasyLeaders: fantasyLeaders,
+        multipliers: multipliers
+    });
+});
+
 router.get('/stats', async (req, res, next) => {
     const seasonstatstotals = await SeasonStatsTotal.find({"game.season": 2020});
     const pointsSeasonLeaders = seasonstatstotals.sort(function(a, b) {

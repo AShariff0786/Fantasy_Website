@@ -58,6 +58,9 @@ const seasonStatsSchema = new mongoose.Schema({
     stl: Number,
     team: teamSchema,
     turnover: Number,
+    dd: Boolean,
+    td: Boolean,
+    qd: Boolean
 });
 
 module.exports = mongoose.model('SeasonStats', seasonStatsSchema);
