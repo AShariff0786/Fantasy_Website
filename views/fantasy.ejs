@@ -31,59 +31,59 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form action="#" autocomplete="off">
+                            <form action="/nba/fantasy" method="POST" autocomplete="off">
                                 <div class="row justify-content-center">
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupPtsInput">Points:</label>
-                                        <input name="ptsText" type="text" class="form-control" id="formGroupPtsInput" placeholder=<%= multipliers.point %> >
+                                        <input required name="ptsText" type="number" class="form-control" id="formGroupPtsInput" placeholder=<%= multipliers.point %> >
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupRebInput">Rebounds:</label>
-                                        <input name="rebText" type="text" class="form-control" id="formGroupRebInput" placeholder=<%= multipliers.reb %>>
+                                        <input required name="rebText" type="number" class="form-control" id="formGroupRebInput" placeholder=<%= multipliers.reb %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupAstInput">Assists:</label>
-                                        <input name="astText" type="text" class="form-control" id="formGroupAstInput" placeholder=<%= multipliers.ast %>>
+                                        <input required name="astText" type="number" class="form-control" id="formGroupAstInput" placeholder=<%= multipliers.ast %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupBlkInput">Blocks:</label>
-                                        <input name="blkText" type="text" class="form-control" id="formGroupBlkInput" placeholder=<%= multipliers.blk %>>
+                                        <input required name="blkText" type="number" class="form-control" id="formGroupBlkInput" placeholder=<%= multipliers.blk %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupStlInput">Steals:</label>
-                                        <input name="stlText" type="text" class="form-control" id="formGroupStlInput" placeholder=<%= multipliers.stl %>>
+                                        <input required name="stlText" type="number" class="form-control" id="formGroupStlInput" placeholder=<%= multipliers.stl %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupFgaInput">Field Goals Attempted:</label>
-                                        <input name="fgaText" type="text" class="form-control" id="formGroupFgaInput" placeholder=<%= multipliers.fga %>>
+                                        <input required name="fgaText" type="number" class="form-control" id="formGroupFgaInput" placeholder=<%= multipliers.fga %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupFgmInput">Field Goals Made:</label>
-                                        <input name="fgmText" type="text" class="form-control" id="formGroupFgmInput" placeholder=<%= multipliers.fgm %>>
+                                        <input required name="fgmText" type="number" class="form-control" id="formGroupFgmInput" placeholder=<%= multipliers.fgm %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupFtaInput">Free Throws Attempted:</label>
-                                        <input name="ftaText" type="text" class="form-control" id="formGroupFtaInput" placeholder=<%= multipliers.fta %>>
+                                        <input required name="ftaText" type="number" class="form-control" id="formGroupFtaInput" placeholder=<%= multipliers.fta %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupFtmInput">Free Throws Made:</label>
-                                        <input name="ftmText" type="text" class="form-control" id="formGroupFtmInput" placeholder=<%= multipliers.ftm %>>
+                                        <input required name="ftmText" type="number" class="form-control" id="formGroupFtmInput" placeholder=<%= multipliers.ftm %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroup3pmInput">3 Pointers Made:</label>
-                                        <input name="3pmText" type="text" class="form-control" id="formGroup3pmInput" placeholder=<%= multipliers.fg3m %>>
+                                        <input required name="fg3mText" type="number" class="form-control" id="formGroup3pmInput" placeholder=<%= multipliers.fg3m %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupTovInput">Turnover:</label>
-                                        <input name="tovText" type="text" class="form-control" id="formGroupTovInput" placeholder=<%= multipliers.tov %>>
+                                        <input required name="tovText" type="number" class="form-control" id="formGroupTovInput" placeholder=<%= multipliers.tov %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupDdInput">Double Double:</label>
-                                        <input name="ddText" type="text" class="form-control" id="formGroupDdInput" placeholder=<%= multipliers.dd %>>
+                                        <input required name="ddText" type="number" class="form-control" id="formGroupDdInput" placeholder=<%= multipliers.dd %>>
                                     </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupTdInput">Triple Double:</label>
-                                        <input name="tdText" type="text" class="form-control" id="formGroupTdInput" placeholder=<%= multipliers.td %>>
+                                        <input required name="tdText" type="number" class="form-control" id="formGroupTdInput" placeholder=<%= multipliers.td %>>
                                     </div>
                                     <div class="col-lg-12 col-xl-12 mt-3 text-center">
                                         <button type="submit" class="btn btn-secondary">Submit</button>
@@ -159,6 +159,24 @@
                     "initComplete": function(settings, json) {
                         $('.fantasyTable').show();
                     }
+                });
+
+                $('.dataTable').on('click', function() {
+                    const id = table.row(this).data()[0];
+                    const data = { playerID: id };
+                    
+                    $.ajax({
+                        url: '/nba/players',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(data),
+                        success: function(data) {
+                            $('.playerTable').hide();
+                            $('#player-info-header').hide();
+                            $('#player-info-container').html(data);
+                            $('#player-info-container').fadeIn(1000);
+                        }
+                    });
                 });
             });
         </script>

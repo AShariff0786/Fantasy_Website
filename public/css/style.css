@@ -105,6 +105,15 @@ div.btn-group button:hover,
     font-size: small;
 }
 
+#standings,
+#standings_length > label > select,
+#standings_filter > label > input,
+#standings_paginate > ul > li:nth-child(n) > a {
+    background-color: #131313;
+    color: #ffffff;
+    font-size: small;
+}
+
 #seasonAvg,
 #seasonAvg_length > label > select,
 #seasonAvg_filter > label > input,
@@ -126,7 +135,8 @@ div.btn-group button:hover,
 #nbaPlayers_paginate > ul > li:nth-child(n) > a:hover,
 #seasonAvg > ul > li:nth-child(n) > a:hover
 #nbaPlayer > ul > li:nth-child(n) > a:hover
-#fantasy > ul > li:nth-child(n) > a:hover {
+#fantasy > ul > li:nth-child(n) > a:hover,
+#standings > ul > li:nth-child(n) > a:hover {
     background-color: #0071BC;
 }
 
@@ -216,4 +226,14 @@ div.btn-group button:hover,
 
 #multiplierModal > .modal-dialog > .modal-content {
     background-color: #131313;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
 }

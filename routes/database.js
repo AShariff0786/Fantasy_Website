@@ -358,6 +358,7 @@ async function updateSeasonStatsTotalsByDate(date) {
             const filter = {"player.id": playerID};
             const total = await SeasonStatsTotal.findOne(filter);
             if (!total) {
+                console.log(playerID);
                 continue;
             } else {
                 let totaldd = total.totaldd, totaltd = total.totaltd, totalqd = total.totalqd;
