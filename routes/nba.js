@@ -409,7 +409,12 @@ router.get('/teams', async (req, res, next) => {
 
 router.get('/standings', async (req, res, next) => {
     const records = await TeamRecord.find({"record.year": 2020});
-    res.render('standings.ejs', {teams: records});
+    const sortedStandings = records.sort(function(a,b){
+        if(a.record.wins > b.record.wins)
+            return -1;
+        else return 1;
+    });
+    res.render('standings.ejs', {teams: sortedStandings});
 
 });
 
