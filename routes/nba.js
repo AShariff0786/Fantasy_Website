@@ -27,9 +27,9 @@ function getDate() {
     return [year, month, day].join('-');
 }
 
-async function joinSeasonAverageAndPlayers() {
+async function joinSeasonAverageAndPlayers(option) {
     const result = await SeasonAvg.aggregate([{
-        $match: { season : 2020 }
+        $match: { season : Number(option) }
         }, {
         $lookup: {
             from: 'players',
@@ -296,67 +296,205 @@ router.get('/fantasy', async (req, res, next) => {
 });
 
 router.post('/fantasy', async (req, res, next) => {
-    const multipliers = {
-        point: req.body.ptsText,
-        fg3m: req.body.fg3mText,
-        fga: req.body.fgaText,
-        fgm: req.body.fgmText,
-        fta: req.body.ftaText,
-        ftm: req.body.ftmText,
-        reb: req.body.rebText,
-        ast: req.body.astText,
-        stl: req.body.stlText,
-        blk: req.body.blkText,
-        tov: req.body.tovText,
-        dd: req.body.ddText,
-        td: req.body.tdText
-    }
-    const seasonTotals = await SeasonStatsTotal.find({ 'game.season': 2020});
-    let fantasyLeaders = [];
-    for(let total of seasonTotals) {
-        const fpts = (total.pts * multipliers.point) + (total.fg3m * multipliers.fg3m) + 
-                     (total.fga * multipliers.fga) + (total.fgm * multipliers.fgm) + 
-                     (total.fta * multipliers.fta) + (total.ftm * multipliers.ftm) + 
-                     (total.reb * multipliers.reb) + (total.ast * multipliers.ast) + 
-                     (total.stl * multipliers.stl) + (total.blk * multipliers.blk) + 
-                     (total.turnover * multipliers.tov) + (total.totaldd * multipliers.dd) + 
-                     (total.totaltd * multipliers.td);
-        const leader = {
-            full_name: `${total.player.first_name} ${total.player.last_name}`,
-            team: total.team.abbreviation,
-            position: total.player.position,
-            pts: total.pts,
-            reb: total.reb,
-            ast: total.ast,
-            blk: total.blk,
-            stl: total.stl,
-            fga: total.fga,
-            fgm: total.fgm,
-            fta: total.fta,
-            ftm: total.ftm,
-            fg3m: total.fg3m,
-            tov: total.turnover,
-            dd: total.totaldd,
-            td: total.totaltd,
-            fpts: fpts
+    const season = req.body.seasonOption;
+    const date = req.body.gameDate;
+    if(req.body.action == 'Totals') {
+        const multipliers = {
+            point: 1,
+            fg3m: 1,
+            fga: -1,
+            fgm: 2,
+            fta: -1,
+            ftm: 1,
+            reb: 1,
+            ast: 2,
+            stl: 4,
+            blk: 4,
+            tov: -2,
+            dd: 3,
+            td: 3
         }
-        let temp = leader.full_name.toLowerCase().replace(/ /g, "-");
-        temp = temp.replace(/'/g, "");
-        temp = temp.replace(/\./g , "");
-        let image_name;
-        try {
-            await fs.promises.access('./public/images/headshots/260x190/' + temp + '.png');
-            image_name = temp + '.png';
-        } catch (error) {
-            image_name = 'logoman.png';
+        const seasonTotals = await SeasonStatsTotal.find({ 'game.season': season});
+        let fantasyLeaders = [];
+        for(let total of seasonTotals) {
+            const fpts = (total.pts * multipliers.point) + (total.fg3m * multipliers.fg3m) + 
+                        (total.fga * multipliers.fga) + (total.fgm * multipliers.fgm) + 
+                        (total.fta * multipliers.fta) + (total.ftm * multipliers.ftm) + 
+                        (total.reb * multipliers.reb) + (total.ast * multipliers.ast) + 
+                        (total.stl * multipliers.stl) + (total.blk * multipliers.blk) + 
+                        (total.turnover * multipliers.tov) + (total.totaldd * multipliers.dd) + 
+                        (total.totaltd * multipliers.td);
+            const leader = {
+                full_name: `${total.player.first_name} ${total.player.last_name}`,
+                team: total.team.abbreviation,
+                position: total.player.position,
+                pts: total.pts,
+                reb: total.reb,
+                ast: total.ast,
+                blk: total.blk,
+                stl: total.stl,
+                fga: total.fga,
+                fgm: total.fgm,
+                fta: total.fta,
+                ftm: total.ftm,
+                fg3m: total.fg3m,
+                tov: total.turnover,
+                dd: total.totaldd,
+                td: total.totaltd,
+                fpts: fpts
+            }
+            let temp = leader.full_name.toLowerCase().replace(/ /g, "-");
+            temp = temp.replace(/'/g, "");
+            temp = temp.replace(/\./g , "");
+            let image_name;
+            try {
+                await fs.promises.access('./public/images/headshots/260x190/' + temp + '.png');
+                image_name = temp + '.png';
+            } catch (error) {
+                image_name = 'logoman.png';
+            }
+            leader.image_name = image_name;
+            fantasyLeaders.push(leader);
         }
-        leader.image_name = image_name;
-        fantasyLeaders.push(leader);
+        res.render('fantasy.ejs', {
+            fantasyLeaders: fantasyLeaders,
+            multipliers: multipliers
+        });
+    } else if(req.body.action == 'Daily') {
+        const multipliers = {
+            point: 1,
+            fg3m: 1,
+            fga: -1,
+            fgm: 2,
+            fta: -1,
+            ftm: 1,
+            reb: 1,
+            ast: 2,
+            stl: 4,
+            blk: 4,
+            tov: -2,
+            dd: 3,
+            td: 3
+        }
+        const checkDate = date + 'T00:00:00.000Z';
+        const statsByDate = await SeasonStats.find({ 'game.date': checkDate});
+        let fantasyLeaders = [];
+        for(let total of statsByDate) {
+            let fpts = (total.pts * multipliers.point) + (total.fg3m * multipliers.fg3m) + 
+                        (total.fga * multipliers.fga) + (total.fgm * multipliers.fgm) + 
+                        (total.fta * multipliers.fta) + (total.ftm * multipliers.ftm) + 
+                        (total.reb * multipliers.reb) + (total.ast * multipliers.ast) + 
+                        (total.stl * multipliers.stl) + (total.blk * multipliers.blk) + 
+                        (total.turnover * multipliers.tov);
+            let leader = {
+                full_name: `${total.player.first_name} ${total.player.last_name}`,
+                team: total.team.abbreviation,
+                position: total.player.position,
+                pts: total.pts,
+                reb: total.reb,
+                ast: total.ast,
+                blk: total.blk,
+                stl: total.stl,
+                fga: total.fga,
+                fgm: total.fgm,
+                fta: total.fta,
+                ftm: total.ftm,
+                fg3m: total.fg3m,
+                tov: total.turnover,
+                fpts: fpts
+            }
+            if(total.dd) {
+                leader.dd = 1;
+                fpts = fpts + multipliers.dd;
+            } else {
+                leader.dd = 0;
+            }
+            if(total.td) {
+                leader.td = 1;
+                fpts = fpts + multipliers.td;
+            } else {
+                leader.td = 0;
+            }
+            let temp = leader.full_name.toLowerCase().replace(/ /g, "-");
+            temp = temp.replace(/'/g, "");
+            temp = temp.replace(/\./g , "");
+            let image_name;
+            try {
+                await fs.promises.access('./public/images/headshots/260x190/' + temp + '.png');
+                image_name = temp + '.png';
+            } catch (error) {
+                image_name = 'logoman.png';
+            }
+            leader.image_name = image_name;
+            fantasyLeaders.push(leader);
+        }
+        res.render('fantasy.ejs', {
+            fantasyLeaders: fantasyLeaders,
+            multipliers: multipliers
+        });
+    } else {
+        const multipliers = {
+            point: req.body.ptsText,
+            fg3m: req.body.fg3mText,
+            fga: req.body.fgaText,
+            fgm: req.body.fgmText,
+            fta: req.body.ftaText,
+            ftm: req.body.ftmText,
+            reb: req.body.rebText,
+            ast: req.body.astText,
+            stl: req.body.stlText,
+            blk: req.body.blkText,
+            tov: req.body.tovText,
+            dd: req.body.ddText,
+            td: req.body.tdText
+        }
+        const seasonTotals = await SeasonStatsTotal.find({ 'game.season': season});
+        let fantasyLeaders = [];
+        for(let total of seasonTotals) {
+            const fpts = (total.pts * multipliers.point) + (total.fg3m * multipliers.fg3m) + 
+                        (total.fga * multipliers.fga) + (total.fgm * multipliers.fgm) + 
+                        (total.fta * multipliers.fta) + (total.ftm * multipliers.ftm) + 
+                        (total.reb * multipliers.reb) + (total.ast * multipliers.ast) + 
+                        (total.stl * multipliers.stl) + (total.blk * multipliers.blk) + 
+                        (total.turnover * multipliers.tov) + (total.totaldd * multipliers.dd) + 
+                        (total.totaltd * multipliers.td);
+            const leader = {
+                full_name: `${total.player.first_name} ${total.player.last_name}`,
+                team: total.team.abbreviation,
+                position: total.player.position,
+                pts: total.pts,
+                reb: total.reb,
+                ast: total.ast,
+                blk: total.blk,
+                stl: total.stl,
+                fga: total.fga,
+                fgm: total.fgm,
+                fta: total.fta,
+                ftm: total.ftm,
+                fg3m: total.fg3m,
+                tov: total.turnover,
+                dd: total.totaldd,
+                td: total.totaltd,
+                fpts: fpts
+            }
+            let temp = leader.full_name.toLowerCase().replace(/ /g, "-");
+            temp = temp.replace(/'/g, "");
+            temp = temp.replace(/\./g , "");
+            let image_name;
+            try {
+                await fs.promises.access('./public/images/headshots/260x190/' + temp + '.png');
+                image_name = temp + '.png';
+            } catch (error) {
+                image_name = 'logoman.png';
+            }
+            leader.image_name = image_name;
+            fantasyLeaders.push(leader);
+        }
+        res.render('fantasy.ejs', {
+            fantasyLeaders: fantasyLeaders,
+            multipliers: multipliers
+        });
     }
-    res.render('fantasy.ejs', {
-        fantasyLeaders: fantasyLeaders,
-        multipliers: multipliers
-    });
 });
 
 router.get('/stats', async (req, res, next) => {
@@ -380,7 +518,42 @@ router.get('/stats', async (req, res, next) => {
         return b.fg3m - a.fg3m;
     }).slice(0, 5);
 
-    const seasonAvg = await joinSeasonAverageAndPlayers();
+    const seasonAvg = await joinSeasonAverageAndPlayers(2020);
+
+    res.render('stats.ejs', {
+        pointsSeasonLeaders: pointsSeasonLeaders,
+        reboundsSeasonLeaders: reboundsSeasonLeaders,
+        assistsSeasonLeaders: assistsSeasonLeaders,
+        blocksSeasonLeaders: blocksSeasonLeaders,
+        stealsSeasonLeaders: stealsSeasonLeaders,
+        threePointersMadeSeasonLeaders: threePointersMadeSeasonLeaders,
+        seasonAvg: seasonAvg
+    });
+});
+
+router.post('/stats', async (req, res, next) => {
+    const option = req.body.seasonOption;
+    const seasonstatstotals = await SeasonStatsTotal.find({"game.season": option});
+    const pointsSeasonLeaders = seasonstatstotals.sort(function(a, b) {
+        return b.pts - a.pts;
+    }).slice(0, 5);
+    const reboundsSeasonLeaders = seasonstatstotals.sort(function(a, b) {
+        return b.reb - a.reb;
+    }).slice(0, 5);
+    const assistsSeasonLeaders = seasonstatstotals.sort(function(a, b) {
+        return b.ast - a.ast;
+    }).slice(0, 5);
+    const blocksSeasonLeaders = seasonstatstotals.sort(function(a, b) {
+        return b.blk - a.blk;
+    }).slice(0, 5);
+    const stealsSeasonLeaders = seasonstatstotals.sort(function(a, b) {
+        return b.stl - a.stl;
+    }).slice(0, 5);
+    const threePointersMadeSeasonLeaders = seasonstatstotals.sort(function(a, b) {
+        return b.fg3m - a.fg3m;
+    }).slice(0, 5);
+
+    const seasonAvg = await joinSeasonAverageAndPlayers(option);
 
     res.render('stats.ejs', {
         pointsSeasonLeaders: pointsSeasonLeaders,
@@ -474,6 +647,18 @@ router.get('/teams', async (req, res, next) => {
 
 router.get('/standings', async (req, res, next) => {
     const records = await TeamRecord.find({"record.year": 2020});
+    const sortedStandings = records.sort(function(a,b){
+        if(a.record.wins > b.record.wins)
+            return -1;
+        else return 1;
+    });
+    res.render('standings.ejs', {teams: sortedStandings});
+
+});
+
+router.post('/standings', async (req, res, next) => {
+    const option = req.body.seasonOption;
+    const records = await TeamRecord.find({"record.year": option});
     const sortedStandings = records.sort(function(a,b){
         if(a.record.wins > b.record.wins)
             return -1;

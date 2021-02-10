@@ -14,7 +14,7 @@ require('dotenv').config();
 const API_URL = 'https://www.balldontlie.io/api/v1/';
 
 router.get('/', async(req, res) => {
-    renderMessage(res, true, "Please remember to add the Season Stats By Date for yesterday's date in the format of YYYY-MM-DD and also update the Season Average for current season 2020. Also update the records for the 2020 season by date." , "success");
+    renderMessage(res, true, "Please remember to update all records for the current season with the option Update All By Date." , "success");
 });
 
 router.post('/', async(req, res) => {
@@ -32,6 +32,19 @@ router.post('/', async(req, res) => {
             renderMessage(res, true, `The API returned with no data, try again later.`, "error");
         } else {
             renderMessage(res, true, `Success: All players stats have been added to the database for the ${query} season.`, "success");
+        }
+    } else if(option == "updateAllByDate") {
+        const result = await updateAllByDate();
+        if (result == "error1") {
+            renderMessage(res, true, "Invalid query input for a date e.g. 2021-01-01 must follow format YYYY-MM-DD.", "error");
+        } else if (result == "error2") {
+            renderMessage(res, true, `The database contains the games for the date of ${query}.`, "error");
+        } else if (result == "error3") {
+            renderMessage(res, true, `Something went wrong, please check the console logs!`, "error");
+        } else if (result == "error4") {
+            renderMessage(res, true, `The API returned with no data, try again later.`, "error");
+        } else {
+            renderMessage(res, true, `Success: All players stats have been added to the database for the date of ${query}.`, "success");
         }
     } else if(option == "addSeasonStatsByDate") {
         const result = await addAllPlayerSeasonStatsByDate(query);
@@ -208,6 +221,37 @@ function doubleOrTripleOrQuadDoubleCheck(element) {
         checks.qd = true;
     }
     return checks;
+}
+
+async function updateAllByDate() {
+    const date = new Date();
+    const year = date.toISOString().substring(0,4) - 1;
+    let dateCounter = 1;
+    while(dateCounter > 0) {
+        date.setDate(date.getDate() - dateCounter);
+        const queryDate = date.toISOString().substring(0, 10);
+        const checkDate = queryDate + 'T00:00:00.000Z';
+        const check = await SeasonStats.findOne({'game.date': checkDate});
+        if(!check) {
+            try {
+                console.log(`STARTING TO ADD DATA FOR DATE OF: ${queryDate}`);
+                console.log(`ADDING ALL SEASON STATS FOR DATE: ${queryDate}`);
+                await addAllPlayerSeasonStatsByDate(queryDate);
+                console.log('DONE ADDING SEASON STATS');
+                console.log(`UPDATING TEAM RECORDS FOR DATE: ${queryDate}`);
+                await updateRecordsByDate(queryDate);
+                console.log('DONE UPDATING TEAM RECORDS');
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+            console.log(`DATA FOUND FOR: ${checkDate}`);
+            break;
+        }
+    }
+    console.log('UPDATING SEASON AVERAGES');
+    await addAllPlayerSeasonAveragesBySeason(year);
+    console.log('DONE!');
 }
 
 async function addAllPlayerSeasonStatsBySeason(season) {

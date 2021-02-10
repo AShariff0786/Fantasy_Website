@@ -62,13 +62,21 @@ div.btn-group,
 
 div.btn-group button,
 #multiplierButton button,
-#multiplierModal > div > div > div.modal-body > form > div > div.col-lg-12.col-xl-12.mt-3.text-center > button {
+#multiplierModal > div > div > div.modal-body > form > div > div.col-lg-12.col-xl-12.mt-3.text-center > button,
+.fantasy-options input[type=submit] {
     background-color: #131313;
+}
+
+#gameDateOption {
+    background-color: #131313;
+    color: #ffffff;
 }
 
 div.btn-group button:hover,
 #multiplierButton button:hover,
-#multiplierModal > div > div > div.modal-body > form > div > div.col-lg-12.col-xl-12.mt-3.text-center > button:hover {
+#multiplierModal > div > div > div.modal-body > form > div > div.col-lg-12.col-xl-12.mt-3.text-center > button:hover,
+.fantasy-options input[type=submit]:hover,
+#gameDateOption:hover {
     background-color: #0071BC;
 }
 
@@ -85,6 +93,11 @@ div.btn-group button:hover,
 #team-logos-svg-teams {
     width: 64px;
     height: 64px;
+}
+
+#team-logos-svg-teams-standings {
+    width: 32px;
+    height: 32px;
 }
 
 #nbaPlayers,

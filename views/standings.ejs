@@ -18,7 +18,25 @@
             </div>
         </div>
 
-        <div class="container-fluid p-3">
+        <div class="season-form mb-3">
+            <form action="/nba/standings" method="post" autocomplete="off">
+                <div class="row justify-content-center">
+                    <div class="col-lg-3 col-xl-3">
+                        <select class="form-select" name="seasonOption">
+                            <option selected>Season</option>
+                            <% for(let i = 2020; i >= 2010; i--) { %> 
+                                <option value="<%= i %>"><%= i %>-<%= i + 1 %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-lg-1 col-xl-1">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="container-fluid px-5">
             <div class="standingsTable">
                 <h1 class="text-center mb-3">Western Conference:</h1>
                 <table id="standings" class="table table-hover table-sm">
@@ -34,7 +52,7 @@
                         <% teams.forEach(team => { %>
                             <% if(team.game.conference== "West") { %>
                                 <tr>
-                                    <th scope="row"><%= team.game.full_name %></th>
+                                    <th scope="row"><img id="team-logos-svg-teams-standings" src=<%= "/images/logos/" + team.game.name + ".svg" %>><%= team.game.full_name %></th>
                                     <td><%= team.record.wins %></td>
                                     <td><%= team.record.loss %></td>
                                     <td><%= team.record.year %></td>
@@ -46,7 +64,7 @@
             </div>
         </div>
 
-        <div class="container-fluid p-3">
+        <div class="container-fluid px-5">
             <div class="standingsTable">
                 <h1 class="text-center mb-3">Eastern Conference:</h1>
                 <table id="standings" class="table table-hover table-sm">
@@ -62,7 +80,7 @@
                         <% teams.forEach(team => { %>
                             <% if(team.game.conference== "East") { %>
                                 <tr>
-                                    <th scope="row"><%= team.game.full_name %></th>
+                                    <th scope="row"><img id="team-logos-svg-teams-standings" src=<%= "/images/logos/" + team.game.name + ".svg" %>><%= team.game.full_name %></th>
                                     <td><%= team.record.wins %></td>
                                     <td><%= team.record.loss %></td>
                                     <td><%= team.record.year %></td>

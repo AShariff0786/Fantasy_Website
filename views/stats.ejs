@@ -16,13 +16,30 @@
                 <%- include('./templates/_nbaRouteButtons.ejs') %>
             </div>
         </div>
-        <div class="container-fluid p-5">
+        <div class="container-fluid px-5">
             <h1 class="text-center">
                 Player Stats: 
             </h1>
+            <div class="season-form mb-3">
+                <form action="/nba/stats" method="post" autocomplete="off">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-3 col-xl-3">
+                            <select class="form-select" name="seasonOption">
+                                <option selected>Season</option>
+                                <% for(let i = 2020; i >= 2010; i--) { %> 
+                                    <option value="<%= i %>"><%= i %>-<%= i + 1 %> </option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="col-lg-1 col-xl-1">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
             <div class="row">
                 <h3 class="text-center">
-                    Season Leaders 
+                    Season Leaders
                 </h3>
                 <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                     <div class="card mt-3 cardFade">

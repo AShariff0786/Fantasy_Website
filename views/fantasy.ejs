@@ -33,6 +33,14 @@
                         <div class="modal-body">
                             <form action="/nba/fantasy" method="POST" autocomplete="off">
                                 <div class="row justify-content-center">
+                                    <div class="col-lg-12 col-xl-12 mt-2">
+                                        <label for="formGroupSelectSeason">Season:</label>
+                                        <select id="formGroupSelectSeason" class="form-select" name="seasonOption">
+                                            <% for(let i = 2020; i >= 2010; i--) { %> 
+                                                <option value="<%= i %>"><%= i %>-<%= i + 1 %> </option>
+                                            <% } %>
+                                        </select>
+                                    </div>
                                     <div class="col-lg-6 col-xl-6 mt-2">
                                         <label for="formGroupPtsInput">Points:</label>
                                         <input required name="ptsText" type="number" class="form-control" id="formGroupPtsInput" placeholder=<%= multipliers.point %> >
@@ -95,6 +103,28 @@
                 </div>
             </div>
         </div>
+
+        <div class="container-fluid fantasy-options px-5 mt-2">
+            <form action="/nba/fantasy" method="post" autocomplete="off">
+                <div class="row">
+                    <div class="col-lg-3 col-xl-3 mt-2">
+                        <select class="form-select" name="seasonOption">
+                            <% for(let i = 2020; i >= 2010; i--) { %> 
+                                <option value="<%= i %>"><%= i %>-<%= i + 1 %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-xl-2 mt-2">
+                        <input class="form-control" type="date" id="gameDateOption" name="gameDate">
+                    </div>
+                    <div class="col-lg-2 col-xl-2 mt-2">
+                        <input class="btn btn-secondary" type="submit" name="action" value="Totals" />
+                        <input class="btn btn-secondary" type="submit" name="action" value="Daily" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        
         <div class="container-fluid p-5">
             <div style="display:none" class="fantasyTable">
                 <table id="fantasy" class="table table-hover">
@@ -159,24 +189,6 @@
                     "initComplete": function(settings, json) {
                         $('.fantasyTable').show();
                     }
-                });
-
-                $('.dataTable').on('click', function() {
-                    const id = table.row(this).data()[0];
-                    const data = { playerID: id };
-                    
-                    $.ajax({
-                        url: '/nba/players',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify(data),
-                        success: function(data) {
-                            $('.playerTable').hide();
-                            $('#player-info-header').hide();
-                            $('#player-info-container').html(data);
-                            $('#player-info-container').fadeIn(1000);
-                        }
-                    });
                 });
             });
         </script>
